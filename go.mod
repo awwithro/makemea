@@ -1,4 +1,4 @@
-module makemea
+module github.com/awwithro/makemea
 
 go 1.16
 
