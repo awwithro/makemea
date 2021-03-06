@@ -18,7 +18,6 @@
 | -------------------- |
 | Roogna               |
 | Grayskull            |
-| Hogwarts             |
 | Castle AARrrrrgghhhh |
 | Edinburgh            |
 | Neuschwanstein       |
@@ -28,7 +27,7 @@
 | Name |
 | ---- |
 | Bob  |
-| Sue |
+| Sue  |
 
 # Things
 
