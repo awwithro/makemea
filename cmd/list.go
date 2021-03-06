@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"makemea/randomtable"
 	"sort"
+
+	"github.com/awwithro/makemea/randomtable"
 )
 
 func list(tree randomtable.Tree, prefix string) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"makemea/cmd"
+	"github.com/awwithro/makemea/cmd"
 )
 
 func main() {

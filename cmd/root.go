@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"makemea/randomtable"
 	"os"
 	"path/filepath"
+
+	"github.com/awwithro/makemea/randomtable"
 
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
