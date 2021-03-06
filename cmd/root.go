@@ -8,7 +8,6 @@ import (
 	"makemea/randomtable"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
@@ -33,9 +32,7 @@ var rootCmd = &cobra.Command{
 		ls, _ := cmd.Flags().GetBool("list")
 		// list the tables
 		if ls {
-			for _, item := range sort.StringSlice(tree.ListTables(tableName)) {
-				fmt.Println(item)
-			}
+			list(tree, tableName)
 		} else { // get an item from the table
 			// table, err := tree.GetTable(tableName)
 			// if err != nil {
