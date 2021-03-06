@@ -42,6 +42,8 @@ Every table has a name. This name is used to tell MakeMeA which table to roll on
 | Mace    |
 | Spear   |
 
+You can see all of the tables that MakeMeA has detected by using the `--list` command
+
 ## Templates
 
 There are a few template functions that can be used to allow for more complex table behavior. Under the hood, golang templates are used. The syntax will be familiar to go programmers but is easy enough for anyone to follow.
