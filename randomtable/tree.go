@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"text/template"
 
 	"github.com/dghubble/trie"
+	"github.com/justinian/dice"
 )
 
 type RandomTableTree struct {
@@ -69,6 +71,7 @@ func (t *RandomTableTree) GetItem(table string) (string, error) {
 func (t *RandomTableTree) renderItem(item string) (string, error) {
 	funcMap := template.FuncMap{
 		"lookup": t.lookup,
+		"roll":   t.roll,
 	}
 	tmpl, err := template.New("item").Funcs(funcMap).Parse(item)
 	if err != nil {
@@ -89,6 +92,15 @@ func (t *RandomTableTree) lookup(item string) string {
 	t.lookupDepth++
 	i, _ := t.getItem(item)
 	return i
+}
+
+// roll is a template function for rolling dice on a table
+func (t *RandomTableTree) roll(d string) string {
+	result, _, err := dice.Roll(d)
+	if err != nil {
+		return d
+	}
+	return strconv.Itoa(result.Int())
 }
 
 func (t *RandomTableTree) getItem(table string) (string, error) {
