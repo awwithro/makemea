@@ -53,13 +53,13 @@ func TestHeaderLookups(t *testing.T) {
 		{
 			tablePath: "places/castle/name",
 			expected: []string{
-				"Roogna", "Grayskull", "Hogwarts", "Castle AARrrrrgghhhh", "Edinburgh", "Neuschwanstein",
+				"Roogna", "Grayskull", "Castle AARrrrrgghhhh", "Edinburgh", "Neuschwanstein",
 			},
 		},
 		{
 			tablePath: "people/name",
 			expected: []string{
-				"Mar", "Alex",
+				"Bob", "Sue",
 			},
 		},
 		{
