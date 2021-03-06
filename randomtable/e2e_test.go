@@ -2,8 +2,6 @@ package randomtable
 
 import (
 	"bytes"
-	"io/ioutil"
-	"log"
 	"reflect"
 	"sort"
 	"testing"
@@ -14,8 +12,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-const markdownfixture = "./tests/test.md"
-
 type TestCases struct {
 	tablePath string
 	expected  []string
@@ -23,10 +19,6 @@ type TestCases struct {
 
 func TestHeaderLookups(t *testing.T) {
 	tree := NewTree()
-	source, err := ioutil.ReadFile(markdownfixture)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var buf bytes.Buffer
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
@@ -34,7 +26,7 @@ func TestHeaderLookups(t *testing.T) {
 			renderer.WithNodeRenderers(
 				util.Prioritized(NewRandomTableRenderer(tree), 1))),
 	)
-	if err := md.Convert(source, &buf); err != nil {
+	if err := md.Convert(bytes.NewBufferString(testmakrkwon).Bytes(), &buf); err != nil {
 		t.Error(err)
 	}
 	tests := []TestCases{
@@ -96,10 +88,6 @@ func TestHeaderLookups(t *testing.T) {
 
 func TestListTables(t *testing.T) {
 	tree := NewTree()
-	source, err := ioutil.ReadFile(markdownfixture)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var buf bytes.Buffer
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
@@ -107,7 +95,7 @@ func TestListTables(t *testing.T) {
 			renderer.WithNodeRenderers(
 				util.Prioritized(NewRandomTableRenderer(tree), 1))),
 	)
-	if err := md.Convert(source, &buf); err != nil {
+	if err := md.Convert(bytes.NewBufferString(testmakrkwon).Bytes(), &buf); err != nil {
 		t.Error(err)
 	}
 	tests := []TestCases{
@@ -120,10 +108,58 @@ func TestListTables(t *testing.T) {
 	}
 	for _, tc := range tests {
 		actual := tree.ListTables(tc.tablePath)
-		actual = sort.StringSlice(actual)
-		tc.expected = sort.StringSlice(tc.expected)
+		actualSorted := sort.StringSlice(actual)
+		actualSorted.Sort()
+		expectedSorted := sort.StringSlice(tc.expected)
+		expectedSorted.Sort()
 		if !reflect.DeepEqual(actual, tc.expected) {
-			t.Errorf("Expected to find %s but got %s", tc.expected, actual)
+			t.Errorf("Expected to find %s but got %s", expectedSorted, actualSorted)
 		}
 	}
 }
+
+const testmakrkwon = `| Color  |
+| ------ |
+| Blue   |
+| Red    |
+| Yellow |
+
+# Places
+
+| Country |
+| ------- |
+| USA     |
+| Mexico  |
+| Canada  |
+
+## Castle
+
+| Name                 |
+| -------------------- |
+| Roogna               |
+| Grayskull            |
+| Castle AARrrrrgghhhh |
+| Edinburgh            |
+| Neuschwanstein       |
+
+# People
+
+| Name |
+| ---- |
+| Bob  |
+| Sue  |
+
+# Things
+
+| Item                                             | 2d4 |
+| ------------------------------------------------- | --- |
+| Dagger                                            | 2   |
+| Coin                                              | 3-6 |
+| Gem                                               | 7   |
+| Sword from Castle {{lookup "places/castle/name"}} | 8   |
+
+| Fancy                          |
+| ------------------------------ |
+| Shiny {{lookup "things/item"}} |
+
+`
