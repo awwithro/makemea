@@ -17,9 +17,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "makemea",
+	Use:   "makemea <table_name>",
 	Short: "MakeMeA is a tool to let GMs roll on lookup tables composed in markdown",
-	Long:  `todo`,
+	Long: `MakeMeA is a tool to let GMs roll on lookup tables composed in markdown.
+It will recursively search the current directory for any markdown files
+and attempt to turn any tables in those files into tables that can be rolled on.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tableName string
 		if len(args) == 0 {
