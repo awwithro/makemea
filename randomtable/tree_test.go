@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestRandomTableTree(t *testing.T) {
+func TestTree(t *testing.T) {
 	expected := NewRandomTable()
 	expectedRollingTable, err := NewRollingTable("1d6")
 	if err != nil {
 		t.Error(err)
 	}
-	tree := NewRandomTableTree()
+	tree := NewTree()
 	tree.AddTable("Test", &expected)
 	tree.AddTable("TestRolling", &expectedRollingTable)
 	actual, _ := tree.GetTable("Test")

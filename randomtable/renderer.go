@@ -14,7 +14,7 @@ import (
 
 type randomTableRenderer struct {
 	nodeRendererFuncsTmp map[ast.NodeKind]renderer.NodeRendererFunc
-	tree                 RandomTableTree
+	tree                 Tree
 	namespace            []string
 	depth                int
 }
@@ -37,7 +37,7 @@ func (r *randomTableRenderer) Name() string {
 	return strings.Join(r.namespace, "/")
 }
 
-func NewRandomTableRenderer(tree RandomTableTree) renderer.NodeRenderer {
+func NewRandomTableRenderer(tree Tree) renderer.NodeRenderer {
 
 	r := &randomTableRenderer{
 		nodeRendererFuncsTmp: map[ast.NodeKind]renderer.NodeRendererFunc{},

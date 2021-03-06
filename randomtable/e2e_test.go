@@ -22,7 +22,7 @@ type TestCases struct {
 }
 
 func TestHeaderLookups(t *testing.T) {
-	tree := NewRandomTableTree()
+	tree := NewTree()
 	source, err := ioutil.ReadFile(markdownfixture)
 	if err != nil {
 		log.Fatal(err)
@@ -95,7 +95,7 @@ func TestHeaderLookups(t *testing.T) {
 }
 
 func TestListTables(t *testing.T) {
-	tree := NewRandomTableTree()
+	tree := NewTree()
 	source, err := ioutil.ReadFile(markdownfixture)
 	if err != nil {
 		log.Fatal(err)

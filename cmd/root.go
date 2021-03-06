@@ -64,7 +64,7 @@ func Execute() {
 	}
 }
 
-func parseMarkdown(path string, tree randomtable.RandomTableTree) {
+func parseMarkdown(path string, tree randomtable.Tree) {
 	source, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -81,7 +81,7 @@ func parseMarkdown(path string, tree randomtable.RandomTableTree) {
 	}
 }
 
-func loadTablesIntoTree(tree randomtable.RandomTableTree) error {
+func loadTablesIntoTree(tree randomtable.Tree) error {
 	err := filepath.Walk(".",
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -98,8 +98,8 @@ func loadTablesIntoTree(tree randomtable.RandomTableTree) error {
 	return nil
 }
 
-func MustGetTree() randomtable.RandomTableTree {
-	tree := randomtable.NewRandomTableTree()
+func MustGetTree() randomtable.Tree {
+	tree := randomtable.NewTree()
 	err := loadTablesIntoTree(tree)
 	if err != nil {
 		log.Fatalf("Unable to load tables: %v", err)

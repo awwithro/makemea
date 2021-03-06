@@ -12,26 +12,30 @@ import (
 	"github.com/justinian/dice"
 )
 
-type RandomTableTree struct {
+// Tree holds lookup tables and allows for retrieveing tables as well as items from tables.
+// In addition, the tree handles the rendering of any templates that are a part of a table
+type Tree struct {
 	tables         *trie.PathTrie
 	lookupDepth    int
 	maxLookupDepth int
 }
 
-func NewRandomTableTree() RandomTableTree {
-	return RandomTableTree{
+func NewTree() Tree {
+	return Tree{
 		tables:         trie.NewPathTrie(),
 		lookupDepth:    0,
 		maxLookupDepth: 100,
 	}
 }
 
-func (t *RandomTableTree) AddTable(name string, table Table) {
+// AddTable adds the given table with the given name
+func (t *Tree) AddTable(name string, table Table) {
 	name = strings.ToLower(name)
 	t.tables.Put(name, table)
 }
 
-func (t *RandomTableTree) GetTable(name string) (Table, error) {
+// GetTable returns the table with the given name in the tree
+func (t *Tree) GetTable(name string) (Table, error) {
 	name = strings.ToLower(name)
 	table := t.tables.Get(name)
 	if table == nil {
@@ -46,7 +50,8 @@ func (t *RandomTableTree) GetTable(name string) (Table, error) {
 	return nil, errors.New("Unable to determine table type")
 }
 
-func (t *RandomTableTree) ListTables(prefix string) []string {
+// ListTables will return a list of all the tables that are loaded in the tree that start with the given prefix
+func (t *Tree) ListTables(prefix string) []string {
 	tables := []string{}
 	t.tables.Walk(func(key string, value interface{}) error {
 		_, ok := value.(Table)
@@ -60,7 +65,7 @@ func (t *RandomTableTree) ListTables(prefix string) []string {
 
 // GetItem retreieves an item from a table and will render any items
 // that include templates. Wraps getItem for loop detection
-func (t *RandomTableTree) GetItem(table string) (string, error) {
+func (t *Tree) GetItem(table string) (string, error) {
 
 	item, err := t.getItem(table)
 	//reset the lookup now that we've finished
@@ -68,7 +73,7 @@ func (t *RandomTableTree) GetItem(table string) (string, error) {
 	return item, err
 }
 
-func (t *RandomTableTree) renderItem(item string) (string, error) {
+func (t *Tree) renderItem(item string) (string, error) {
 	funcMap := template.FuncMap{
 		"lookup": t.lookup,
 		"roll":   t.roll,
@@ -84,7 +89,7 @@ func (t *RandomTableTree) renderItem(item string) (string, error) {
 }
 
 // lookup is a template function for looking up items on other tables
-func (t *RandomTableTree) lookup(item string) string {
+func (t *Tree) lookup(item string) string {
 	// checking for a loop
 	if t.lookupDepth >= t.maxLookupDepth {
 		return item
@@ -95,7 +100,7 @@ func (t *RandomTableTree) lookup(item string) string {
 }
 
 // roll is a template function for rolling dice on a table
-func (t *RandomTableTree) roll(d string) string {
+func (t *Tree) roll(d string) string {
 	result, _, err := dice.Roll(d)
 	if err != nil {
 		return d
@@ -103,7 +108,7 @@ func (t *RandomTableTree) roll(d string) string {
 	return strconv.Itoa(result.Int())
 }
 
-func (t *RandomTableTree) getItem(table string) (string, error) {
+func (t *Tree) getItem(table string) (string, error) {
 	tb, err := t.GetTable(table)
 	if err != nil {
 		return "", err
