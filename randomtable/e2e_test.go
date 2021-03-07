@@ -66,6 +66,12 @@ func TestHeaderLookups(t *testing.T) {
 				"Shiny Dagger", "Shiny Coin", "Shiny Gem", "Shiny Sword",
 			},
 		},
+		{
+			tablePath: "nested/lookup",
+			expected: []string{
+				"Foo", "Bar", "Baz",
+			},
+		},
 	}
 	for i, tc := range tests {
 		actual, err := tree.GetItem(tc.tablePath)
@@ -102,7 +108,7 @@ func TestListTables(t *testing.T) {
 		{
 			tablePath: "",
 			expected: []string{
-				"color", "places/country", "places/castle/name", "people/name", "things/item", "things/fancy",
+				"color", "nested/lookup", "nested/subnest/subtable", "nested/subnest/table", "nested/table", "places/country", "places/castle/name", "people/name", "things/item", "things/fancy",
 			},
 		},
 	}
@@ -120,7 +126,7 @@ func TestListTables(t *testing.T) {
 
 const testmakrkwon = `| Color  |
 | ------ |
-| Blue   |
+| B----e |
 | Red    |
 | Yellow |
 
@@ -151,7 +157,7 @@ const testmakrkwon = `| Color  |
 
 # Things
 
-| Item                                             | 2d4 |
+| Item                                              | 2d4 |
 | ------------------------------------------------- | --- |
 | Dagger                                            | 2   |
 | Coin                                              | 3-6 |
@@ -161,5 +167,26 @@ const testmakrkwon = `| Color  |
 | Fancy                          |
 | ------------------------------ |
 | Shiny {{lookup "things/item"}} |
+
+# Nested
+
+| Lookup               |
+| -------------------- |
+| {{lookup "./table"}} |
+
+| Table                        |
+| ---------------------------- |
+| Foo                          |
+| {{lookup "./subnest/table"}} |
+
+## Subnest
+| Table                    |
+| ------------------------ |
+| Bar                      |
+| {{lookup "./subtable" }} |
+
+| Subtable |
+| -------- |
+| Baz      |
 
 `

@@ -58,6 +58,14 @@ The `lookup` function can be used to get a result from another table an use it a
 | Glowing {{lookup "makemea/tables/dice table/treasure" }} |
 | Large {{lookup "makemea/tables/lookup table/race" }}     |
 
+When you have a large hierarchy of deeply-nested tables, it can be cumbersome to provide the full path to every table. You can use relative paths to shorten the call to lookup. The below table has both the full path to the fancy table as well as relative paths to the same table. Try it with: `makemea makemea/templates/lookup/fancier`
+
+| Fancier                                           |
+| ------------------------------------------------- |
+| Rusty {{lookup "makemea/templates/lookup/fancy"}} |
+| Glittering {{ lookup "./fancy"}}                  |
+| Sparkling {{ lookup "./fancy"}}                   |
+
 ### roll
 
 The `roll` function is used to roll a set of dice as part of the final result. This is great for treasure if you want to generate a random amount of some currency. Try it with `makemea makemea/templates/roll/horde`
@@ -68,3 +76,8 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 | {{roll "5d20+50"}} Silver    |
 | {{roll "5d8+10"}} Gold       |
 | {{roll "3d6"}} Platinum      |
+
+## TODO
+
+1. Hidden tables meant to be used in compound lookups but not show up in the listing
+2. Relative pathing for lookup ./ notaion

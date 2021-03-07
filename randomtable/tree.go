@@ -73,9 +73,11 @@ func (t *Tree) GetItem(table string) (string, error) {
 	return item, err
 }
 
-func (t *Tree) renderItem(item string) (string, error) {
+// renderItem will render any templates for a given item. Table is the path the item was
+// found on to allow for lookups using relative paths
+func (t *Tree) renderItem(item string, table string) (string, error) {
 	funcMap := template.FuncMap{
-		"lookup": t.lookup,
+		"lookup": t.getLookup(table),
 		"roll":   t.roll,
 	}
 	tmpl, err := template.New("item").Funcs(funcMap).Parse(item)
@@ -88,15 +90,25 @@ func (t *Tree) renderItem(item string) (string, error) {
 
 }
 
-// lookup is a template function for looking up items on other tables
-func (t *Tree) lookup(item string) string {
-	// checking for a loop
-	if t.lookupDepth >= t.maxLookupDepth {
-		return item
+// getLookup provides a function for retrieving items from other tables.
+// It uses a closure to provide the calling table to allow relative pathing
+func (t *Tree) getLookup(table string) func(string) string {
+	return func(item string) string {
+		// replace the relative path with the full path
+		if strings.HasPrefix(item, "./") {
+			tablePaths := strings.Split(table, "/")
+			pathToTable := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
+			item = strings.Replace(item, "./", pathToTable+"/", 1)
+		}
+		// checking for a loop
+		if t.lookupDepth >= t.maxLookupDepth {
+			return item
+		}
+		t.lookupDepth++
+		i, _ := t.getItem(item)
+		return i
 	}
-	t.lookupDepth++
-	i, _ := t.getItem(item)
-	return i
+
 }
 
 // roll is a template function for rolling dice on a table
@@ -114,5 +126,5 @@ func (t *Tree) getItem(table string) (string, error) {
 		return "", err
 	}
 	item := tb.GetItem()
-	return t.renderItem(item)
+	return t.renderItem(item, table)
 }
