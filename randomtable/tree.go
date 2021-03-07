@@ -2,7 +2,6 @@ package randomtable
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,6 +19,12 @@ type Tree struct {
 	maxLookupDepth int
 }
 
+// TableNode embeds the table that was created and adds meta-data for use in the tree
+type TableNode struct {
+	Table
+	Hidden bool
+}
+
 func NewTree() Tree {
 	return Tree{
 		tables:         trie.NewPathTrie(),
@@ -31,31 +36,31 @@ func NewTree() Tree {
 // AddTable adds the given table with the given name
 func (t *Tree) AddTable(name string, table Table) {
 	name = strings.ToLower(name)
-	t.tables.Put(name, table)
+	t.tables.Put(name, TableNode{Table: table})
 }
 
 // GetTable returns the table with the given name in the tree
-func (t *Tree) GetTable(name string) (Table, error) {
+func (t *Tree) GetTable(name string) (TableNode, error) {
 	name = strings.ToLower(name)
 	table := t.tables.Get(name)
+	//fmt.Printf("Table: %s", table)
 	if table == nil {
-		return nil, fmt.Errorf("%s table not found", name)
+		return TableNode{}, fmt.Errorf("%s table not found", name)
 	}
-	switch tableTyped := table.(type) {
-	case *RandomTable:
-		return tableTyped, nil
-	case *RollingTable:
-		return tableTyped, nil
+	tb := table.(TableNode)
+	switch tableTyped := tb.Table.(type) {
+	default:
+		tb.Table = tableTyped
+		return tb, nil
 	}
-	return nil, errors.New("Unable to determine table type")
 }
 
-// ListTables will return a list of all the tables that are loaded in the tree that start with the given prefix
+// ListTables will return a list of all the tables that aren't marked as hiddn, that are loaded in the tree, and that start with the given prefix
 func (t *Tree) ListTables(prefix string) []string {
 	tables := []string{}
 	t.tables.Walk(func(key string, value interface{}) error {
-		_, ok := value.(Table)
-		if ok && strings.HasPrefix(key, prefix) {
+		tb, ok := value.(TableNode)
+		if ok && strings.HasPrefix(key, prefix) && !tb.Hidden {
 			tables = append(tables, key)
 		}
 		return nil

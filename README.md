@@ -42,7 +42,13 @@ Every table has a name. This name is used to tell MakeMeA which table to roll on
 | Mace    |
 | Spear   |
 
-You can see all of the tables that MakeMeA has detected by using the `--list` command
+You can see all of the tables that MakeMeA has detected by using the `--list` command. Sometimes, you'll have a bunch of subtables that are used by a parent table. If the subtables aren't meant to be used on their own, you can hide them from the listing view by italicizing the name of the table. Notice that while the below table doesn't show up under the `--list` command, it is still accessable via `makemea makemea/organizing/hidden`
+
+| _hidden_ |
+| -------- |
+| Secret   |
+| Mystery  |
+| Illusion |
 
 ## Templates
 

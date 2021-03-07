@@ -34,7 +34,7 @@ func (r *randomTableRenderer) Pop() {
 }
 
 func (r *randomTableRenderer) Name() string {
-	return strings.Join(r.namespace, "/")
+	return strings.ToLower(strings.Join(r.namespace, "/"))
 }
 
 func NewRandomTableRenderer(tree Tree) renderer.NodeRenderer {
@@ -54,12 +54,14 @@ func (r *randomTableRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegiste
 	reg.Register(gast.KindTableRow, r.renderTableRow)
 	reg.Register(ast.KindHeading, r.renderHeading)
 	reg.Register(gast.KindTable, r.renderTable)
+	reg.Register(ast.KindEmphasis, r.renderEmphasis)
 }
 
 func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
 		var table Table
-
+		// The first cell cotnains the name of the table
+		tablename := string(n.FirstChild().Text(source))
 		// A single header cell is a regular table
 		if n.ChildCount() == 1 {
 			t := NewRandomTable()
@@ -71,8 +73,6 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 			table = &t
 		}
 		// Push the header into the namespace when entering the header
-		// The first cell cotnains the name of the table
-		tablename := string(n.FirstChild().Text(source))
 		r.Push(tablename)
 
 		r.tree.AddTable(r.Name(), table)
@@ -135,6 +135,18 @@ func (r *randomTableRenderer) renderTable(writer util.BufWriter, source []byte, 
 	// Pop the namespace when we finish with a table
 	if !entering {
 		r.Pop()
+	}
+	return ast.WalkContinue, nil
+}
+
+func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		t, err := r.tree.GetTable(r.Name())
+		if err != nil {
+			return ast.WalkContinue, err
+		}
+		t.Hidden = true
+		r.tree.tables.Put(r.Name(), t)
 	}
 	return ast.WalkContinue, nil
 }
