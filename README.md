@@ -82,8 +82,3 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 | {{roll "5d20+50"}} Silver    |
 | {{roll "5d8+10"}} Gold       |
 | {{roll "3d6"}} Platinum      |
-
-## TODO
-
-1. Hidden tables meant to be used in compound lookups but not show up in the listing
-2. Relative pathing for lookup ./ notaion
