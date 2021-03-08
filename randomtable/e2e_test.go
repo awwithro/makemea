@@ -124,9 +124,10 @@ func TestListTables(t *testing.T) {
 	}
 }
 
-const testmakrkwon = `| Color  |
+const testmakrkwon = `
+| Color  |
 | ------ |
-| B----e |
+| Blue   |
 | Red    |
 | Yellow |
 
