@@ -2,6 +2,10 @@
 
 MakeMeA is a tool for GameMasters (GMs) of TableTopRPGs (TTRPGs) that allows for generating data from random tables. Markdoen and github style tables are used to create and organize the tables. Since this README is a markdown file and contains tables, all of these examples can be used with the tool.
 
+## Installing
+
+`go get -u github.com/awwithro/makemea`
+
 ## Tables
 
 MakeMeA supports several types of tables
