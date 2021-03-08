@@ -1,6 +1,6 @@
 # MakeMeA
 
-MakeMeA is a tool for GameMasters (GMs) of TableTopRPGs (TTRPGs) that allows for generating data from random tables. Markdoen and github style tables are used to create and organize the tables. Since thie README is a markdown file and contains tables, all of these examples can be used with the tool.
+MakeMeA is a tool for GameMasters (GMs) of TableTopRPGs (TTRPGs) that allows for generating data from random tables. Markdoen and github style tables are used to create and organize the tables. Since this README is a markdown file and contains tables, all of these examples can be used with the tool.
 
 ## Tables
 
@@ -72,6 +72,12 @@ When you have a large hierarchy of deeply-nested tables, it can be cumbersome to
 | Glittering {{ lookup "./fancy"}}                  |
 | Sparkling {{ lookup "./fancy"}}                   |
 
+`lookup` also allows an for an optional argument for performing the same lookup multiple times. The following table will result in three itmes being selected from the `fancier` table: `makemea makemea/templates/lookup/count`
+
+| Count                    |
+| ------------------------ |
+| {{lookup "./fancier" 3}} |
+
 ### roll
 
 The `roll` function is used to roll a set of dice as part of the final result. This is great for treasure if you want to generate a random amount of some currency. Try it with `makemea makemea/templates/roll/horde`
@@ -82,3 +88,53 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 | {{roll "5d20+50"}} Silver    |
 | {{roll "5d8+10"}} Gold       |
 | {{roll "3d6"}} Platinum      |
+
+### Combining Templates
+
+`roll` and `lookup` can be combined useing variables to lookup a value from another table a random number of times. The following table does the following:
+
+1. Rolls 2d4
+2. Stores the result in a variable named "r"
+3. Calls the lookup function and uses the value of "r" to perform the lookup 2 - 8
+
+Try it with `makemea "makemea/templates/combining templates/encounter"`
+
+| Encounter                                                            |
+| -------------------------------------------------------------------- |
+| {{$r := roll "2d4"}}{{lookup "makemea/tables/lookup table/race" $r}} |
+
+## Variables
+
+More complex lookups can be done by using a variable to lookup a table based on the result of another lookup. In this table, an npc is generated on a single table. This is done by:
+
+1. Doing a lookup of the Race table
+2. Storing the result of the lookup into the variabls `$r`
+3. Using the `$r` variable to determine which name table to use
+4. Printing out an NPC using both the race and name generated
+
+Try it with `./makemea "makemea/variables/npc"`
+
+| NPC                                                                            |
+| ------------------------------------------------------------------------------ |
+| {{$r:=lookup "./race" }}Race: {{$r}} Name: {{lookup (print "./" $r "/names")}} |
+
+| _Race_ |
+| ------ |
+| Elven  |
+| Human  |
+
+### Elven
+
+| _Names_ |
+| ------- |
+| Alluin  |
+| Arwen   |
+| Aegnor  |
+
+### Human
+
+| _Names_ |
+| ------- |
+| Beorn   |
+| Aldor   |
+| Fulgar  |

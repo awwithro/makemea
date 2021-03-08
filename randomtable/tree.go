@@ -97,21 +97,46 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 
 // getLookup provides a function for retrieving items from other tables.
 // It uses a closure to provide the calling table to allow relative pathing
-func (t *Tree) getLookup(table string) func(string) string {
-	return func(item string) string {
+func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) string {
+	return func(item string, rolls ...interface{}) string {
+		// number of times to roll
+		var times int
+
 		// replace the relative path with the full path
 		if strings.HasPrefix(item, "./") {
-			tablePaths := strings.Split(table, "/")
-			pathToTable := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
-			item = strings.Replace(item, "./", pathToTable+"/", 1)
+			tablePaths := strings.Split(callingTable, "/")
+			tablePrefix := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
+			item = strings.Replace(item, "./", tablePrefix+"/", 1)
 		}
+		if len(rolls) == 0 {
+			times = 1
+		} else {
+			var err error
+			switch r := rolls[0].(type) {
+			case string:
+				times, err = strconv.Atoi(r)
+				if err != nil {
+					times = 1
+				}
+			case int:
+				times = r
+			}
+		}
+
 		// checking for a loop
 		if t.lookupDepth >= t.maxLookupDepth {
 			return item
 		}
 		t.lookupDepth++
-		i, _ := t.getItem(item)
-		return i
+
+		result := []string{}
+		for x := 1; x <= times; x++ {
+			i, err := t.getItem(item)
+			if err == nil {
+				result = append(result, i)
+			}
+		}
+		return strings.Join(result, ", ")
 	}
 
 }

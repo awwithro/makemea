@@ -16,7 +16,6 @@ type RandomTable struct {
 }
 
 func (r *RandomTable) GetItem() string {
-	rand.Seed(int64(r.seed))
 	randomIndex := rand.Intn(len(r.items))
 	return r.items[randomIndex]
 }
@@ -26,8 +25,11 @@ func (r *RandomTable) AddItem(item string, n ...int) {
 }
 
 func NewRandomTable() RandomTable {
-	return RandomTable{
+
+	t := RandomTable{
 		items: []string{},
 		seed:  time.Now().Nanosecond(),
 	}
+	rand.Seed(int64(t.seed))
+	return t
 }
