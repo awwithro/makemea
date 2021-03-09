@@ -142,3 +142,18 @@ Try it with `./makemea "makemea/variables/npc"`
 | Beorn   |
 | Aldor   |
 | Fulgar  |
+
+
+## Text
+
+Its not quite a table but sometimes you want to generate something that perfoms lookups on other tables. Something like an NPC. It would be cumbersome to stuff everything into a table sell. Instead you can use a fenced code block. Here, the npc example from above has been redone using a code block. The result is much easier to undersatnd and maintain. Try it with `makemea makemea/text/npc`
+
+``` npc
+{{$r:=lookup "makemea/variables/race" -}}
+{{$name := lookup (print  "makemea/variables/" $r "/names") -}}
+{{$level := roll "2d4" -}}
+Name: {{$name}}
+Race: {{$r}}
+Level: {{$level}}
+HP: {{roll (print $level "d6")}}
+```

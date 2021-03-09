@@ -55,6 +55,7 @@ func (r *randomTableRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegiste
 	reg.Register(ast.KindHeading, r.renderHeading)
 	reg.Register(gast.KindTable, r.renderTable)
 	reg.Register(ast.KindEmphasis, r.renderEmphasis)
+	reg.Register(ast.KindFencedCodeBlock, r.renderFencedCodeBlock)
 }
 
 func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -148,5 +149,28 @@ func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byt
 		t.Hidden = true
 		r.tree.tables.Put(r.Name(), t)
 	}
+	return ast.WalkContinue, nil
+}
+
+func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		t := NewTextTable()
+		n := node.(*ast.FencedCodeBlock)
+
+		// If the block doesn't have a title, don't treat it as a table since it can't be addressed
+		if n.Language(source) == nil {
+			return ast.WalkContinue, nil
+		}
+		title := string(n.Language(source))
+		// Combine all the lines into a single string and use that for the table Item
+		var result string
+		for _, line := range n.Lines().Sliced(0, n.Lines().Len()) {
+			result += string(line.Value(source))
+		}
+		t.AddItem(result)
+
+		r.tree.AddTable(r.Name()+"/"+title, &t)
+	}
+
 	return ast.WalkContinue, nil
 }
