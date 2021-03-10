@@ -1,6 +1,6 @@
 # MakeMeA
 
-MakeMeA is a tool for GameMasters (GMs) of TableTopRPGs (TTRPGs) that allows for generating data from random tables. Markdoen and github style tables are used to create and organize the tables. Since this README is a markdown file and contains tables, all of these examples can be used with the tool.
+MakeMeA is a tool for GameMasters (GMs) of TableTopRPGs (TTRPGs) that allows for generating data from random tables. Markdown and github style tables are used to create and organize the tables. Since this README is a markdown file and contains tables, all of these examples can be used with the tool.
 
 ## Installing
 
@@ -12,7 +12,7 @@ MakeMeA supports several types of tables
 
 ### Lookup Table
 
-A lookup table is the most simple of tables. The table has a name and every item on the table has the same probability of being selected. Try it with `makemea "makemea/tables/lookup table/race"`
+A lookup table is the most simple of tables. The table has a name and every item on the table has the same probability of being selected. Try it with `makemea "makemea/tables/lookuptable/race"`
 
 | Race   |
 | ------ |
@@ -26,7 +26,7 @@ A lookup table is the most simple of tables. The table has a name and every item
 
 ### Dice Table
 
-A Dice table has different probabilities for each item on the table. The number and type of dice are given as part of the table and the results of the roll are used to select an item from the table. Try it with `makemea "makemea/tables/dice table/treasure`
+A Dice table has different probabilities for each item on the table. The number and type of dice are given as part of the table and the results of the roll are used to select an item from the table. Try it with `makemea "makemea/tables/dicetable/treasure`
 
 | Treasure | 1d6 |
 | -------- | --- |
@@ -56,7 +56,7 @@ You can see all of the tables that MakeMeA has detected by using the `--list` co
 
 ## Templates
 
-There are a few template functions that can be used to allow for more complex table behavior. Under the hood, golang templates are used. The syntax will be familiar to go programmers but is easy enough for anyone to follow.
+There are a few template functions that can be used to allow for more complex table behavior. Under the hood, golang templates are used. The syntax will be familiar to go programmers but is easy enough for anyone to follow. It also allows for the use of conditionals, loops, and other templating functions.
 
 ### lookup
 
@@ -65,8 +65,8 @@ The `lookup` function can be used to get a result from another table an use it a
 | Fancy                                                    |
 | -------------------------------------------------------- |
 | Shiny {{lookup "makemea/organizing/weapons" }}           |
-| Glowing {{lookup "makemea/tables/dice table/treasure" }} |
-| Large {{lookup "makemea/tables/lookup table/race" }}     |
+| Glowing {{lookup "makemea/tables/dicetable/treasure" }} |
+| Large {{lookup "makemea/tables/lookuptable/race" }}     |
 
 When you have a large hierarchy of deeply-nested tables, it can be cumbersome to provide the full path to every table. You can use relative paths to shorten the call to lookup. The below table has both the full path to the fancy table as well as relative paths to the same table. Try it with: `makemea makemea/templates/lookup/fancier`
 
@@ -101,20 +101,22 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 2. Stores the result in a variable named "r"
 3. Calls the lookup function and uses the value of "r" to perform the lookup 2 - 8
 
-Try it with `makemea "makemea/templates/combining templates/encounter"`
+Try it with `makemea "makemea/templates/combiningtemplates/encounter"`
 
 | Encounter                                                            |
 | -------------------------------------------------------------------- |
-| {{$r := roll "2d4"}}{{lookup "makemea/tables/lookup table/race" $r}} |
+| {{$r := roll "2d4"}}{{lookup "makemea/tables/lookuptable/race" $r}} |
 
 ## Variables
 
-More complex lookups can be done by using a variable to lookup a table based on the result of another lookup. In this table, an npc is generated on a single table. This is done by:
+More complex lookups can be done by using a variable to lookup a table based on the result of another lookup. In this example, an npc is generated on a single table. This is done by:
 
 1. Doing a lookup of the Race table
 2. Storing the result of the lookup into the variabls `$r`
 3. Using the `$r` variable to determine which name table to use
 4. Printing out an NPC using both the race and name generated
+
+Admittedly, fitting this logic into a single table cell is a bit cumbersome. Luckily there is also an option for creating text blocks that are easily formatted and clearer to read.
 
 Try it with `./makemea "makemea/variables/npc"`
 
@@ -142,7 +144,6 @@ Try it with `./makemea "makemea/variables/npc"`
 | Beorn   |
 | Aldor   |
 | Fulgar  |
-
 
 ## Text
 

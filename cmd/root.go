@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/awwithro/makemea/randomtable"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -31,6 +30,11 @@ and attempt to turn any tables in those files into tables that can be rolled on.
 			tableName = args[0]
 		}
 		tree := MustGetTree()
+		if err := tree.ValidateTables(); err != nil {
+			for _, e := range err.Errors {
+				log.Warn(e)
+			}
+		}
 
 		ls, _ := cmd.Flags().GetBool("list")
 		// list the tables

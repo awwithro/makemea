@@ -8,7 +8,9 @@ import (
 	"text/template"
 
 	"github.com/dghubble/trie"
+	"github.com/hashicorp/go-multierror"
 	"github.com/justinian/dice"
+	log "github.com/sirupsen/logrus"
 )
 
 // Tree holds lookup tables and allows for retrieveing tables as well as items from tables.
@@ -33,15 +35,24 @@ func NewTree() Tree {
 	}
 }
 
-// AddTable adds the given table with the given name
+// AddTable adds the given table with the given name.
+// Names have spaces removed and turned to lowercase
 func (t *Tree) AddTable(name string, table Table) {
-	name = strings.ToLower(name)
+	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
+
+	// check for existing table
+	_, err := t.GetItem(name)
+	// no err means we got a table
+	if err == nil {
+		log.Warnf("Duplicate table entered with name: %s", name)
+	}
+
 	t.tables.Put(name, TableNode{Table: table})
 }
 
 // GetTable returns the table with the given name in the tree
 func (t *Tree) GetTable(name string) (TableNode, error) {
-	name = strings.ToLower(name)
+	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
 	table := t.tables.Get(name)
 	//fmt.Printf("Table: %s", table)
 	if table == nil {
@@ -157,4 +168,20 @@ func (t *Tree) getItem(table string) (string, error) {
 	}
 	item := tb.GetItem()
 	return t.renderItem(item, table)
+}
+
+func (t *Tree) ValidateTables() *multierror.Error {
+	result := &multierror.Error{}
+	t.tables.Walk(func(key string, value interface{}) error {
+		if tb, ok := value.(TableNode); ok {
+			if err := tb.Validate(); err != nil {
+				for _, e := range err.Errors {
+					e = fmt.Errorf("%s for table %s", e.Error(), key)
+					multierror.Append(result, e)
+				}
+			}
+		}
+		return nil
+	})
+	return result
 }
