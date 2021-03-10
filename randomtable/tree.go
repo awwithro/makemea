@@ -8,7 +8,6 @@ import (
 	"text/template"
 
 	"github.com/dghubble/trie"
-	"github.com/hashicorp/go-multierror"
 	"github.com/justinian/dice"
 	log "github.com/sirupsen/logrus"
 )
@@ -170,18 +169,11 @@ func (t *Tree) getItem(table string) (string, error) {
 	return t.renderItem(item, table)
 }
 
-func (t *Tree) ValidateTables() *multierror.Error {
-	result := &multierror.Error{}
+func (t *Tree) ValidateTables() {
 	t.tables.Walk(func(key string, value interface{}) error {
 		if tb, ok := value.(TableNode); ok {
-			if err := tb.Validate(); err != nil {
-				for _, e := range err.Errors {
-					e = fmt.Errorf("%s for table %s", e.Error(), key)
-					multierror.Append(result, e)
-				}
-			}
+			tb.Validate()
 		}
 		return nil
 	})
-	return result
 }

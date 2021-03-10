@@ -3,14 +3,12 @@ package randomtable
 import (
 	"math/rand"
 	"time"
-
-	"github.com/hashicorp/go-multierror"
 )
 
 type Table interface {
 	GetItem() string
 	AddItem(string, ...int)
-	Validate() *multierror.Error
+	Validate()
 }
 
 type RandomTable struct {
@@ -27,8 +25,8 @@ func (r *RandomTable) AddItem(item string, n ...int) {
 	r.items = append(r.items, item)
 }
 
-func (r *RandomTable) Validate() *multierror.Error {
-	return nil
+func (r *RandomTable) Validate() {
+	return
 }
 
 func NewRandomTable() RandomTable {

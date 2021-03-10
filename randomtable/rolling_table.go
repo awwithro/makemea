@@ -1,12 +1,10 @@
 package randomtable
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/justinian/dice"
 	log "github.com/sirupsen/logrus"
 )
@@ -15,6 +13,7 @@ type RollingTable struct {
 	items   map[int]string
 	dicestr string
 	seed    int
+	log     log.Entry
 }
 
 func (r *RollingTable) GetItem() string {
@@ -26,7 +25,7 @@ func (r *RollingTable) GetItem() string {
 func (r *RollingTable) AddItem(item string, pos ...int) {
 	for _, x := range pos {
 		if _, exists := r.items[x]; exists {
-			log.Warnf("Duplicate item: %s for roll %v", item, x)
+			r.log.Warnf("Duplicate item: %s for roll %v", item, x)
 		}
 		r.items[x] = item
 	}
@@ -34,20 +33,19 @@ func (r *RollingTable) AddItem(item string, pos ...int) {
 }
 
 // Validate that all numbers in the table are represented, that all numbers can be rolled, and there are no overlapping rolls
-func (r *RollingTable) Validate() *multierror.Error {
-	result := &multierror.Error{}
+func (r *RollingTable) Validate() {
 	count, sides, err := parseDiceString(r.dicestr)
 	if err != nil {
-		multierror.Append(result, err)
+		r.log.Warn(err)
 	}
 	minRoll := count
 	maxRoll := count * sides
 	keys := []int{}
 
 	//look for rolls that can't be reached
-	for k, _ := range r.items {
+	for k := range r.items {
 		if k < minRoll || k > maxRoll {
-			result = multierror.Append(result, fmt.Errorf("%v is outside of the dice range", k))
+			r.log.Warnf("%v is outside of the dice range", k)
 		}
 		keys = append(keys, k)
 	}
@@ -61,19 +59,23 @@ func (r *RollingTable) Validate() *multierror.Error {
 	// Look for rolls that can't be made. Table is missing numbers
 	diff := difference(allRolls, keys)
 	for _, roll := range diff {
-		result = multierror.Append(result, fmt.Errorf("%v is not rollable", roll))
+		r.log.Warnf("%v is not rollable", roll)
 	}
-
-	return result
 }
 
-func NewRollingTable(d string) (RollingTable, error) {
+func NewRollingTable(d string) RollingTable {
 	table := RollingTable{
 		items:   map[int]string{},
 		dicestr: d,
 		seed:    time.Now().Nanosecond(),
+		log:     *log.NewEntry(log.StandardLogger()),
 	}
-	return table, nil
+	return table
+}
+
+func (r RollingTable) WithLogger(logger *log.Entry) RollingTable {
+	r.log = *logger
+	return r
 }
 
 func parseDiceString(dicestr string) (int, int, error) {

@@ -6,10 +6,7 @@ import (
 
 func TestTree(t *testing.T) {
 	expected := NewRandomTable()
-	expectedRollingTable, err := NewRollingTable("1d6")
-	if err != nil {
-		t.Error(err)
-	}
+	expectedRollingTable := NewRollingTable("1d6")
 	tree := NewTree()
 	tree.AddTable("Test", &expected)
 	tree.AddTable("TestRolling", &expectedRollingTable)

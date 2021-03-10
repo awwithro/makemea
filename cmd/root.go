@@ -30,21 +30,14 @@ and attempt to turn any tables in those files into tables that can be rolled on.
 			tableName = args[0]
 		}
 		tree := MustGetTree()
-		if err := tree.ValidateTables(); err != nil {
-			for _, e := range err.Errors {
-				log.Warn(e)
-			}
-		}
+		tree.ValidateTables()
 
 		ls, _ := cmd.Flags().GetBool("list")
 		// list the tables
 		if ls {
 			list(tree, tableName)
-		} else { // get an item from the table
-			// table, err := tree.GetTable(tableName)
-			// if err != nil {
-			// 	log.Fatalf("No table exists with the name: %s", tableName)
-			// }
+		} else {
+			// get an item from the table
 			item, err := tree.GetItem(tableName)
 			if err != nil {
 				log.Fatal(err)

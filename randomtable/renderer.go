@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/yuin/goldmark/ast"
 	gast "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/renderer"
@@ -34,11 +35,10 @@ func (r *randomTableRenderer) Pop() {
 }
 
 func (r *randomTableRenderer) Name() string {
-	return strings.ToLower(strings.Join(r.namespace, "/"))
+	return strings.ReplaceAll(strings.ToLower(strings.Join(r.namespace, "/")), " ", "")
 }
 
 func NewRandomTableRenderer(tree Tree) renderer.NodeRenderer {
-
 	r := &randomTableRenderer{
 		nodeRendererFuncsTmp: map[ast.NodeKind]renderer.NodeRendererFunc{},
 		tree:                 tree,
@@ -63,6 +63,9 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 		var table Table
 		// The first cell cotnains the name of the table
 		tablename := string(n.FirstChild().Text(source))
+
+		// Push the header into the namespace when entering the header
+		r.Push(tablename)
 		// A single header cell is a regular table
 		if n.ChildCount() == 1 {
 			t := NewRandomTable()
@@ -70,11 +73,10 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 
 		} else if n.ChildCount() == 2 { // A Rolling table has two cells, name and dice to roll
 			diceRoll := string(n.LastChild().Text(source))
-			t, _ := NewRollingTable(diceRoll)
+			t := NewRollingTable(diceRoll).WithLogger(
+				log.WithFields(log.Fields{"table": r.Name()}))
 			table = &t
 		}
-		// Push the header into the namespace when entering the header
-		r.Push(tablename)
 
 		r.tree.AddTable(r.Name(), table)
 	} else {
