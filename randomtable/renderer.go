@@ -164,14 +164,15 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 			return ast.WalkContinue, nil
 		}
 		title := string(n.Language(source))
+		r.Push(title)
 		// Combine all the lines into a single string and use that for the table Item
 		var result string
 		for _, line := range n.Lines().Sliced(0, n.Lines().Len()) {
 			result += string(line.Value(source))
 		}
 		t.AddItem(result)
-
-		r.tree.AddTable(r.Name()+"/"+title, &t)
+		r.tree.AddTable(r.Name(), &t)
+		r.Pop()
 	}
 
 	return ast.WalkContinue, nil

@@ -3,6 +3,7 @@ package randomtable
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -65,9 +66,9 @@ func (t *Tree) GetTable(name string) (TableNode, error) {
 	}
 }
 
-// ListTables will return a list of all the tables that aren't marked as hiddn, that are loaded in the tree, and that start with the given prefix
+// ListTables will return a sorted list of all the tables that aren't marked as hiddn, that are loaded in the tree, and that start with the given prefix
 func (t *Tree) ListTables(prefix string) []string {
-	tables := []string{}
+	tables := sort.StringSlice{}
 	t.tables.Walk(func(key string, value interface{}) error {
 		tb, ok := value.(TableNode)
 		if ok && strings.HasPrefix(key, prefix) && !tb.Hidden {
@@ -75,6 +76,7 @@ func (t *Tree) ListTables(prefix string) []string {
 		}
 		return nil
 	})
+	tables.Sort()
 	return tables
 }
 
@@ -118,6 +120,7 @@ func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) strin
 			tablePrefix := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
 			item = strings.Replace(item, "./", tablePrefix+"/", 1)
 		}
+		// rolls represent more than a sinlge item being looked up
 		if len(rolls) == 0 {
 			times = 1
 		} else {

@@ -2,6 +2,7 @@ package randomtable
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -13,124 +14,29 @@ import (
 )
 
 type TestCases struct {
+	table     string
 	tablePath string
+	name      string
 	expected  []string
 }
 
 func TestHeaderLookups(t *testing.T) {
-	tree := NewTree()
-	var buf bytes.Buffer
-	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
-		goldmark.WithRendererOptions(
-			renderer.WithNodeRenderers(
-				util.Prioritized(NewRandomTableRenderer(tree), 1))),
-	)
-	if err := md.Convert(bytes.NewBufferString(testmakrkwon).Bytes(), &buf); err != nil {
-		t.Error(err)
-	}
 	tests := []TestCases{
-		{
-			tablePath: "color",
-			expected: []string{
-				"Blue", "Red", "Yellow",
-			},
-		},
-		{
-			tablePath: "places/country",
-			expected: []string{
-				"USA", "Mexico", "Canada",
-			},
-		},
-		{
-			tablePath: "places/castle/name",
-			expected: []string{
-				"Roogna", "Grayskull", "Castle AARrrrrgghhhh", "Edinburgh", "Neuschwanstein",
-			},
-		},
-		{
-			tablePath: "people/name",
-			expected: []string{
-				"Bob", "Sue",
-			},
-		},
-		{
-			tablePath: "things/item",
-			expected: []string{
-				"Dagger", "Coin", "Gem", "Sword",
-			},
-		},
-		{
-			tablePath: "things/fancy",
-			expected: []string{
-				"Shiny Dagger", "Shiny Coin", "Shiny Gem", "Shiny Sword",
-			},
-		},
-		{
-			tablePath: "nested/lookup",
-			expected: []string{
-				"Foo", "Bar", "Baz",
-			},
-		},
-	}
-	for i, tc := range tests {
-		actual, err := tree.GetItem(tc.tablePath)
-		if err != nil {
-			t.Errorf("TestIndex: %v, Error: %v", i, err)
-		}
-		found := false
-		for _, exepctedItem := range tc.expected {
-			if actual == exepctedItem {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected to find one of %s but got %s", tc.expected, actual)
-		}
-	}
-
-}
-
-func TestListTables(t *testing.T) {
-	tree := NewTree()
-	var buf bytes.Buffer
-	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
-		goldmark.WithRendererOptions(
-			renderer.WithNodeRenderers(
-				util.Prioritized(NewRandomTableRenderer(tree), 1))),
-	)
-	if err := md.Convert(bytes.NewBufferString(testmakrkwon).Bytes(), &buf); err != nil {
-		t.Error(err)
-	}
-	tests := []TestCases{
-		{
-			tablePath: "",
-			expected: []string{
-				"color", "nested/lookup", "nested/subnest/subtable", "nested/subnest/table", "nested/table", "places/country", "places/castle/name", "people/name", "things/item", "things/fancy",
-			},
-		},
-	}
-	for _, tc := range tests {
-		actual := tree.ListTables(tc.tablePath)
-		actualSorted := sort.StringSlice(actual)
-		actualSorted.Sort()
-		expectedSorted := sort.StringSlice(tc.expected)
-		expectedSorted.Sort()
-		if !reflect.DeepEqual(actual, tc.expected) {
-			t.Errorf("Expected to find %s but got %s", expectedSorted, actualSorted)
-		}
-	}
-}
-
-const testmakrkwon = `
+		{table: `
 | Color  |
 | ------ |
 | Blue   |
 | Red    |
 | Yellow |
-
+`,
+			tablePath: "color",
+			name:      "Test Simple Lookup",
+			expected: []string{
+				"Blue", "Red", "Yellow",
+			},
+		},
+		{
+			table: `
 # Places
 
 | Country |
@@ -138,7 +44,17 @@ const testmakrkwon = `
 | USA     |
 | Mexico  |
 | Canada  |
-
+`,
+			tablePath: "places/country",
+			name:      "Test nested table",
+			expected: []string{
+				"USA", "Mexico", "Canada",
+			},
+		},
+		{
+			table: `
+# People
+# Places
 ## Castle
 
 | Name                 |
@@ -148,14 +64,32 @@ const testmakrkwon = `
 | Castle AARrrrrgghhhh |
 | Edinburgh            |
 | Neuschwanstein       |
+`,
+			tablePath: "places/castle/name",
+			name:      "Test multiple nestings",
+			expected: []string{
+				"Roogna", "Grayskull", "Castle AARrrrrgghhhh", "Edinburgh", "Neuschwanstein",
+			},
+		},
+		{
+			table: `
+# Things
 
-# People
-
-| Name |
-| ---- |
-| Bob  |
-| Sue  |
-
+| Item   | 2d4 |
+| ------ | --- |
+| Dagger | 2   |
+| Coin   | 3-6 |
+| Gem    | 7   |
+| Sword  | 8   |
+`,
+			tablePath: "things/item",
+			name:      "Test Rolling",
+			expected: []string{
+				"Dagger", "Coin", "Gem", "Sword",
+			},
+		},
+		{
+			table: `
 # Things
 
 | Item   | 2d4 |
@@ -168,7 +102,15 @@ const testmakrkwon = `
 | Fancy                          |
 | ------------------------------ |
 | Shiny {{lookup "things/item"}} |
-
+`,
+			tablePath: "things/fancy",
+			name:      "Test lookup of other tables",
+			expected: []string{
+				"Shiny Dagger", "Shiny Coin", "Shiny Gem", "Shiny Sword",
+			},
+		},
+		{
+			table: `
 # Nested
 
 | Lookup               |
@@ -189,5 +131,127 @@ const testmakrkwon = `
 | Subtable |
 | -------- |
 | Baz      |
+`,
+			name:      "Test relative pathing",
+			tablePath: "nested/lookup",
+			expected: []string{
+				"Foo", "Bar", "Baz",
+			},
+		},
+		{
+			// No backticks in string literals :(
+			table:     fmt.Sprint("\n``` test\ntest\n```\n\n"),
+			name:      "Test text table",
+			tablePath: "test",
+			expected: []string{
+				"test\n",
+			},
+		},
+		{
+			// No backticks in string literals :(
+			table: `
+| t1  |
+| --- |
+| one |
+
+| t2                |
+| ----------------- |
+| {{lookup "t1" 2}} |
+			`,
+			name:      "Test lookup with counts",
+			tablePath: "t2",
+			expected: []string{
+				"one, one",
+			},
+		},
+	}
+	for _, tc := range tests {
+		tree := NewTree()
+		md := goldmark.New(
+			goldmark.WithExtensions(extension.GFM),
+			goldmark.WithRendererOptions(
+				renderer.WithNodeRenderers(
+					util.Prioritized(NewRandomTableRenderer(tree), 1))),
+		)
+		var buf bytes.Buffer
+		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
+			t.Error(err)
+		}
+		actual, err := tree.GetItem(tc.tablePath)
+		if err != nil {
+			t.Errorf("Test: %v, Error: %v", tc.name, err)
+		}
+		found := false
+		for _, exepctedItem := range tc.expected {
+			if actual == exepctedItem {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Expected to find one of %s but got %s", tc.expected, actual)
+		}
+	}
+
+}
+
+func TestListTables(t *testing.T) {
+	tests := []TestCases{
+		{
+			table:     listTest,
+			tablePath: "",
+			name:      "Test Listing with nested and hidden tables",
+			expected: []string{
+				"t1", "h1/t2", "h1/t3", "h1/h2/t4",
+			},
+		},
+		{
+			table:     listTest,
+			tablePath: "h1",
+			name:      "Test prefix based listing",
+			expected: []string{
+				"h1/t2", "h1/t3", "h1/h2/t4",
+			},
+		},
+	}
+	for _, tc := range tests {
+		tree := NewTree()
+		md := goldmark.New(
+			goldmark.WithExtensions(extension.GFM),
+			goldmark.WithRendererOptions(
+				renderer.WithNodeRenderers(
+					util.Prioritized(NewRandomTableRenderer(tree), 1))),
+		)
+		var buf bytes.Buffer
+		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
+			t.Error(err)
+		}
+		actual := tree.ListTables(tc.tablePath)
+		expectedSorted := sort.StringSlice(tc.expected)
+		expectedSorted.Sort()
+		if !reflect.DeepEqual(actual, tc.expected) {
+			t.Errorf("%s: Expected to find %s but got %s", tc.name, expectedSorted, actual)
+		}
+	}
+}
+
+const listTest = `
+| t1  |
+| --- |
+
+| _t5_ |
+| ---- |
+
+# h1
+| t2  |
+| --- |
+
+| t3  |
+| --- |
+
+## h2
+
+| t4  |
+| --- |
 
 `
