@@ -23,35 +23,17 @@ var rootCmd = &cobra.Command{
 It will recursively search the current directory for any markdown files
 and attempt to turn any tables in those files into tables that can be rolled on.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var tableName string
-		if len(args) == 0 {
-			tableName = ""
-		} else {
-			tableName = args[0]
-		}
+		tableName := args[0]
 		tree := MustGetTree()
 		tree.ValidateTables()
-
-		ls, _ := cmd.Flags().GetBool("list")
-		// list the tables
-		if ls {
-			list(tree, tableName)
-		} else {
-			// get an item from the table
-			item, err := tree.GetItem(tableName)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println(item)
+		item, err := tree.GetItem(tableName)
+		if err != nil {
+			log.Fatal(err)
 		}
+		fmt.Println(item)
 
 	},
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			cmd.SetArgs([]string{""})
-		}
-		return nil
-	},
+	Args: cobra.MinimumNArgs(1),
 }
 
 func Execute() {
@@ -105,6 +87,5 @@ func MustGetTree() randomtable.Tree {
 }
 
 func init() {
-	rootCmd.PersistentFlags().Bool("list", false, "list tables at the given prefix")
-
+	rootCmd.AddCommand(listCmd)
 }
