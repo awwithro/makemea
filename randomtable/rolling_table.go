@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/awwithro/makemea/util"
 	"github.com/justinian/dice"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,7 +18,6 @@ type RollingTable struct {
 }
 
 func (r *RollingTable) GetItem() string {
-	rand.Seed(int64(r.seed))
 	result, _, _ := dice.Roll(r.dicestr)
 	return r.items[result.Int()]
 }
@@ -29,7 +29,14 @@ func (r *RollingTable) AddItem(item string, pos ...int) {
 		}
 		r.items[x] = item
 	}
+}
 
+func (r RollingTable) AllItems() []string {
+	values := []string{}
+	for _, val := range r.items {
+		values = append(values, val)
+	}
+	return util.DeDupe(values)
 }
 
 // Validate that all numbers in the table are represented, that all numbers can be rolled, and there are no overlapping rolls
@@ -57,7 +64,7 @@ func (r *RollingTable) Validate() {
 	}
 
 	// Look for rolls that can't be made. Table is missing numbers
-	diff := difference(allRolls, keys)
+	diff := util.Difference(allRolls, keys)
 	for _, roll := range diff {
 		r.log.Warnf("%v is not rollable", roll)
 	}
@@ -70,6 +77,7 @@ func NewRollingTable(d string) RollingTable {
 		seed:    time.Now().Nanosecond(),
 		log:     *log.NewEntry(log.StandardLogger()),
 	}
+	rand.Seed(int64(table.seed))
 	return table
 }
 
@@ -93,19 +101,4 @@ func parseDiceString(dicestr string) (int, int, error) {
 	}
 
 	return int(count), int(sides), nil
-}
-
-func difference(a, b []int) (diff []int) {
-	m := make(map[int]bool)
-
-	for _, item := range b {
-		m[item] = true
-	}
-
-	for _, item := range a {
-		if _, ok := m[item]; !ok {
-			diff = append(diff, item)
-		}
-	}
-	return diff
 }

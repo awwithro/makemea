@@ -12,8 +12,15 @@ func (t *TextTable) AddItem(item string, n ...int) {
 	t.text += item
 }
 
-func NewTextTable() RandomTable {
+func (t TextTable) AllItems() []string {
+	return []string{t.text}
+}
 
-	t := RandomTable{}
+func (t TextTable) Validate() {
+
+}
+
+func NewTextTable() TextTable {
+	t := TextTable{}
 	return t
 }

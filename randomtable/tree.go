@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/sprig"
 	"github.com/dghubble/trie"
 	"github.com/justinian/dice"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +18,6 @@ import (
 // In addition, the tree handles the rendering of any templates that are a part of a table
 type Tree struct {
 	tables         *trie.PathTrie
-	lookupDepth    int
 	maxLookupDepth int
 }
 
@@ -30,7 +30,6 @@ type TableNode struct {
 func NewTree() Tree {
 	return Tree{
 		tables:         trie.NewPathTrie(),
-		lookupDepth:    0,
 		maxLookupDepth: 100,
 	}
 }
@@ -44,7 +43,7 @@ func (t *Tree) AddTable(name string, table Table) {
 	_, err := t.GetItem(name)
 	// no err means we got a table
 	if err == nil {
-		log.Warnf("Duplicate table entered with name: %s", name)
+		log.WithField("table", name).Warn("Duplicate table entered")
 	}
 
 	t.tables.Put(name, TableNode{Table: table})
@@ -54,7 +53,6 @@ func (t *Tree) AddTable(name string, table Table) {
 func (t *Tree) GetTable(name string) (TableNode, error) {
 	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
 	table := t.tables.Get(name)
-	//fmt.Printf("Table: %s", table)
 	if table == nil {
 		return TableNode{}, fmt.Errorf("%s table not found", name)
 	}
@@ -66,12 +64,13 @@ func (t *Tree) GetTable(name string) (TableNode, error) {
 	}
 }
 
-// ListTables will return a sorted list of all the tables that aren't marked as hiddn, that are loaded in the tree, and that start with the given prefix
-func (t *Tree) ListTables(prefix string) []string {
+// ListTables will return a sorted list of all the tables that are loaded in the tree, and that start with the given prefix.
+// showHidden is used to toggle weather to show tables that are marked as hidden
+func (t *Tree) ListTables(prefix string, showHidden bool) []string {
 	tables := sort.StringSlice{}
 	t.tables.Walk(func(key string, value interface{}) error {
 		tb, ok := value.(TableNode)
-		if ok && strings.HasPrefix(key, prefix) && !tb.Hidden {
+		if ok && strings.HasPrefix(key, prefix) && (showHidden || !tb.Hidden) {
 			tables = append(tables, key)
 		}
 		return nil
@@ -85,8 +84,6 @@ func (t *Tree) ListTables(prefix string) []string {
 func (t *Tree) GetItem(table string) (string, error) {
 
 	item, err := t.getItem(table)
-	//reset the lookup now that we've finished
-	t.lookupDepth = 0
 	return item, err
 }
 
@@ -96,30 +93,34 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 	funcMap := template.FuncMap{
 		"lookup": t.getLookup(table),
 		"roll":   t.roll,
+		"fudge":  t.getFudge(table),
 	}
-	tmpl, err := template.New("item").Funcs(funcMap).Parse(item)
+	mergedFuncMaps := sprig.FuncMap()
+	for k, v := range funcMap {
+		mergedFuncMaps[k] = v
+	}
+	tmpl, err := template.New("item").Funcs(template.FuncMap(mergedFuncMaps)).Parse(item)
 	if err != nil {
 		return "", err
 	}
 	buf := &bytes.Buffer{}
-	tmpl.Execute(buf, nil)
+	err = tmpl.Execute(buf, nil)
+	if err != nil {
+		return "", err
+	}
 	return buf.String(), nil
 
 }
 
 // getLookup provides a function for retrieving items from other tables.
 // It uses a closure to provide the calling table to allow relative pathing
-func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) string {
-	return func(item string, rolls ...interface{}) string {
+func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) (string, error) {
+	lookupDepth := 0
+	return func(item string, rolls ...interface{}) (string, error) {
 		// number of times to roll
 		var times int
+		item = resolvePaths(callingTable, item)
 
-		// replace the relative path with the full path
-		if strings.HasPrefix(item, "./") {
-			tablePaths := strings.Split(callingTable, "/")
-			tablePrefix := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
-			item = strings.Replace(item, "./", tablePrefix+"/", 1)
-		}
 		// rolls represent more than a sinlge item being looked up
 		if len(rolls) == 0 {
 			times = 1
@@ -137,19 +138,19 @@ func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) strin
 		}
 
 		// checking for a loop
-		if t.lookupDepth >= t.maxLookupDepth {
-			return item
+		if lookupDepth >= t.maxLookupDepth {
+			return "poop", nil
 		}
-		t.lookupDepth++
 
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i, err := t.getItem(item)
-			if err == nil {
-				result = append(result, i)
+			if err != nil {
+				return "", err
 			}
+			result = append(result, i)
 		}
-		return strings.Join(result, ", ")
+		return strings.Join(result, ", "), nil
 	}
 
 }
@@ -174,9 +175,50 @@ func (t *Tree) getItem(table string) (string, error) {
 
 func (t *Tree) ValidateTables() {
 	t.tables.Walk(func(key string, value interface{}) error {
+		// Call each table to validate itself
 		if tb, ok := value.(TableNode); ok {
 			tb.Validate()
+
+			// Get all the items and check that they are valid.
+			items := tb.AllItems()
+			for _, item := range items {
+				_, err := t.renderItem(item, key)
+				if err != nil {
+					log.WithField("table", key).Warn(err)
+				}
+			}
 		}
 		return nil
 	})
+}
+
+// fudge performs a lookup on the given table but uses and alternate dice string
+func (t *Tree) getFudge(callingTable string) func(string, string) (string, error) {
+	return func(table, dicestr string) (string, error) {
+		table = resolvePaths(callingTable, table)
+		tb, err := t.GetTable(table)
+		if err != nil {
+			return "", err
+		}
+		var newTable = NewRollingTable(dicestr)
+		switch rt := tb.Table.(type) {
+		case *RollingTable:
+			for k, v := range rt.items {
+				newTable.items[k] = v
+			}
+			newTable.dicestr = dicestr
+		}
+		item := newTable.GetItem()
+		return t.renderItem(item, table)
+	}
+}
+
+func resolvePaths(callingTable, table string) string {
+	// replace the relative path with the full path
+	if strings.HasPrefix(table, "./") {
+		tablePaths := strings.Split(callingTable, "/")
+		tablePrefix := strings.Join(tablePaths[0:len(tablePaths)-1], "/")
+		table = strings.Replace(table, "./", tablePrefix+"/", 1)
+	}
+	return table
 }

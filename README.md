@@ -46,7 +46,9 @@ Every table has a name. This name is used to tell MakeMeA which table to roll on
 | Mace    |
 | Spear   |
 
-You can see all of the tables that MakeMeA has detected by using the `--list` command. Sometimes, you'll have a bunch of subtables that are used by a parent table. If the subtables aren't meant to be used on their own, you can hide them from the listing view by italicizing the name of the table. Notice that while the below table doesn't show up under the `--list` command, it is still accessable via `makemea makemea/organizing/hidden`
+You can see all of the tables that MakeMeA has detected by using the `list` command. Try it with: `makemea list`
+
+Sometimes, you'll have a bunch of subtables that are used by a parent table. If the subtables aren't meant to be used on their own, you can hide them from the listing view by italicizing the name of the table. Notice that while the below table doesn't show up under the `list` command, it is still accessable via `makemea makemea/organizing/hidden`
 
 | _hidden_ |
 | -------- |
@@ -58,13 +60,15 @@ You can see all of the tables that MakeMeA has detected by using the `--list` co
 
 There are a few template functions that can be used to allow for more complex table behavior. Under the hood, golang templates are used. The syntax will be familiar to go programmers but is easy enough for anyone to follow. It also allows for the use of conditionals, loops, and other templating functions.
 
+In addition the below functions, sprig template functions can be used as well. See [here](http://masterminds.github.io/sprig/) for their docs
+
 ### lookup
 
 The `lookup` function can be used to get a result from another table an use it as part of a different result. This lets you reuse tables in more than one place and have complex lookup results. For instance, if we wanted to have fancier versions of the weapons above, we could do the following. Try it wih: `makemea makemea/templates/lookup/fancy`
 
-| Fancy                                                    |
-| -------------------------------------------------------- |
-| Shiny {{lookup "makemea/organizing/weapons" }}           |
+| Fancy                                                   |
+| ------------------------------------------------------- |
+| Shiny {{lookup "makemea/organizing/weapons" }}          |
 | Glowing {{lookup "makemea/tables/dicetable/treasure" }} |
 | Large {{lookup "makemea/tables/lookuptable/race" }}     |
 
@@ -93,6 +97,14 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 | {{roll "5d8+10"}} Gold       |
 | {{roll "3d6"}} Platinum      |
 
+### fudge
+
+The `fudge` function works similar to the `lookup` function but allows you to provide an alternate set of dice to roll. This is useful if you want to reuse an existing table but only want to use a subset of the times on that table. The following will roll on the treasure table put with a die range that will only allow for the silver and gold values to be rolled. Try it with: `makemea makemea/templates/fudge/goldorsilver`
+
+| Gold or Silver                                        |
+| ----------------------------------------------------- |
+| {{fudge "makemea/tables/dicetable/treasure" "1d3+3"}} |
+
 ### Combining Templates
 
 `roll` and `lookup` can be combined useing variables to lookup a value from another table a random number of times. The following table does the following:
@@ -103,8 +115,8 @@ The `roll` function is used to roll a set of dice as part of the final result. T
 
 Try it with `makemea "makemea/templates/combiningtemplates/encounter"`
 
-| Encounter                                                            |
-| -------------------------------------------------------------------- |
+| Encounter                                                           |
+| ------------------------------------------------------------------- |
 | {{$r := roll "2d4"}}{{lookup "makemea/tables/lookuptable/race" $r}} |
 
 ## Variables

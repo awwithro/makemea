@@ -148,7 +148,6 @@ func TestHeaderLookups(t *testing.T) {
 			},
 		},
 		{
-			// No backticks in string literals :(
 			table: `
 | t1  |
 | --- |
@@ -162,6 +161,44 @@ func TestHeaderLookups(t *testing.T) {
 			tablePath: "t2",
 			expected: []string{
 				"one, one",
+			},
+		},
+		{
+			table: `
+| t1  |
+| --- |
+| one |
+
+| t2                  |
+| ------------------- |
+| {{lookup "t1" "2"}} |
+			`,
+			name:      "Test lookup with counts as strings",
+			tablePath: "t2",
+			expected: []string{
+				"one, one",
+			},
+		},
+		{
+			table: `	
+| t1    | 1d4 |
+| ----- | --- |
+| one   | 1   |
+| two   | 2   |
+| three | 3   |
+| four  | 4   |
+| five  | 5   |
+| six   | 6   |
+
+
+| t2                   |
+| -------------------- |
+| {{fudge "t1" "4d1"}} |
+			`,
+			name:      "Test fudge works on a roll table",
+			tablePath: "t2",
+			expected: []string{
+				"four",
 			},
 		},
 	}
@@ -189,7 +226,7 @@ func TestHeaderLookups(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("Expected to find one of %s but got %s", tc.expected, actual)
+			t.Errorf("%s Expected to find one of %s but got %s", tc.name, tc.expected, actual)
 		}
 	}
 
@@ -226,7 +263,7 @@ func TestListTables(t *testing.T) {
 		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
 			t.Error(err)
 		}
-		actual := tree.ListTables(tc.tablePath)
+		actual := tree.ListTables(tc.tablePath, false)
 		expectedSorted := sort.StringSlice(tc.expected)
 		expectedSorted.Sort()
 		if !reflect.DeepEqual(actual, tc.expected) {

@@ -164,6 +164,13 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 			return ast.WalkContinue, nil
 		}
 		title := string(n.Language(source))
+		hide := false
+		// The table should be marked as hidden
+		if strings.HasPrefix(title, "_") && strings.HasSuffix(title, "_") {
+			title = strings.TrimPrefix(title, "_")
+			title = strings.TrimSuffix(title, "_")
+			hide = true
+		}
 		r.Push(title)
 		// Combine all the lines into a single string and use that for the table Item
 		var result string
@@ -172,6 +179,11 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 		}
 		t.AddItem(result)
 		r.tree.AddTable(r.Name(), &t)
+		if hide {
+			tb, _ := r.tree.GetTable(r.Name())
+			tb.Hidden = true
+			r.tree.tables.Put(r.Name(), tb)
+		}
 		r.Pop()
 	}
 

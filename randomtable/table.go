@@ -9,6 +9,7 @@ type Table interface {
 	GetItem() string
 	AddItem(string, ...int)
 	Validate()
+	AllItems() []string
 }
 
 type RandomTable struct {
@@ -29,8 +30,11 @@ func (r *RandomTable) Validate() {
 	return
 }
 
-func NewRandomTable() RandomTable {
+func (r RandomTable) AllItems() []string {
+	return r.items
+}
 
+func NewRandomTable() RandomTable {
 	t := RandomTable{
 		items: []string{},
 		seed:  time.Now().Nanosecond(),
