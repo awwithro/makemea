@@ -88,4 +88,5 @@ func MustGetTree() randomtable.Tree {
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(versionCmd)
 }
