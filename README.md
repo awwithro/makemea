@@ -170,3 +170,7 @@ Race: {{$r}}
 Level: {{$level}}
 HP: {{roll (print $level "d6")}}
 ```
+
+## More
+
+For more comprehensive tables. Check out [OpenRPGTables](https://github.com/awwithro/OpenRPGTables)
