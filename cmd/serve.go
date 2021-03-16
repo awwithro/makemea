@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var port string
+
 var serveCmd = &cobra.Command{
 	Use:   "serve [prefix]",
 	Short: "runs a server that serves tables",
@@ -13,10 +15,10 @@ var serveCmd = &cobra.Command{
 		tree := MustGetTree()
 		tree.ValidateTables()
 		server := server.NewServer(tree)
-		server.Run()
+		server.Run("0.0.0.0" + port)
 	},
 }
 
-// func init() {
-// 	listCmd.PersistentFlags().BoolVarP(&ListAll, "all", "a", false, "List hidden tables")
-// }
+func init() {
+	serveCmd.PersistentFlags().StringVarP(&port, "port", "p", ":8181", "Port for the server to listen on (:8181)")
+}
