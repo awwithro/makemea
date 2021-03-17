@@ -20,5 +20,5 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	serveCmd.PersistentFlags().StringVarP(&port, "port", "p", ":8181", "Port for the server to listen on (:8181)")
+	serveCmd.PersistentFlags().StringVarP(&port, "port", "p", ":8080", "Port for the server to listen on (:8181)")
 }

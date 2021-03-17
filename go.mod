@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/dghubble/trie v0.0.0-20201011220304-ed6d6b8add55
-	github.com/gin-gonic/gin v1.6.3 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.2.0 // indirect
@@ -17,7 +17,9 @@ require (
 	github.com/justinian/dice v1.0.1
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mitchellh/copystructure v1.1.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/slack-go/slack v0.8.1
 	github.com/spf13/cobra v1.1.3
 	github.com/ugorji/go v1.2.4 // indirect
 	github.com/yuin/goldmark v1.3.2
