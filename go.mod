@@ -24,6 +24,7 @@ require (
 	github.com/ugorji/go v1.2.4 // indirect
 	github.com/yuin/goldmark v1.3.2
 	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b // indirect
+	golang.org/x/mod v0.1.0
 	golang.org/x/sys v0.0.0-20210313202042-bd2e13477e9c // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 )

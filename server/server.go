@@ -13,16 +13,20 @@ import (
 )
 
 // NewServer returns a gin server that will serve items from the given tree
-func NewServer(tree randomtable.Tree) *gin.Engine {
-	r := gin.Default()
-	v1 := r.Group("v1")
-	v1.GET("/items/*path", getFunc(tree))
-	v1.GET("/tables/*path", listFunc(tree))
-	r.POST("/slack/events", slashCommandFunc(tree))
-	return r
+func NewServer(tree *randomtable.Tree) *gin.Engine {
+	e := gin.Default()
+	AttachHandlers(e, tree)
+	return e
 }
 
-func listFunc(tree randomtable.Tree) func(*gin.Context) {
+func AttachHandlers(e *gin.Engine, tree *randomtable.Tree) {
+	v1 := e.Group("v1")
+	v1.GET("/items/*path", getFunc(tree))
+	v1.GET("/tables/*path", listFunc(tree))
+	e.POST("/slack/events", slashCommandFunc(tree))
+}
+
+func listFunc(tree *randomtable.Tree) func(*gin.Context) {
 	return func(c *gin.Context) {
 		path := c.Param("path")
 		path = strings.TrimPrefix(path, "/")
@@ -34,7 +38,7 @@ func listFunc(tree randomtable.Tree) func(*gin.Context) {
 	}
 }
 
-func getFunc(tree randomtable.Tree) func(*gin.Context) {
+func getFunc(tree *randomtable.Tree) func(*gin.Context) {
 	return func(c *gin.Context) {
 		path := c.Param("path")
 		path = strings.TrimPrefix(path, "/")
@@ -48,7 +52,7 @@ func getFunc(tree randomtable.Tree) func(*gin.Context) {
 	}
 }
 
-func slashCommandFunc(tree randomtable.Tree) func(*gin.Context) {
+func slashCommandFunc(tree *randomtable.Tree) func(*gin.Context) {
 	return func(c *gin.Context) {
 		s, err := slack.SlashCommandParse(c.Request)
 		if err != nil {
