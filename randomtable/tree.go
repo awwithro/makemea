@@ -118,7 +118,6 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 // getLookup provides a function for retrieving items from other tables.
 // It uses a closure to provide the calling table to allow relative pathing
 func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) (string, error) {
-	lookupDepth := 0
 	return func(item string, rolls ...interface{}) (string, error) {
 		// number of times to roll
 		var times int
@@ -139,12 +138,6 @@ func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) (stri
 				times = r
 			}
 		}
-
-		// checking for a loop
-		if lookupDepth >= t.maxLookupDepth {
-			return "poop", nil
-		}
-
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i, err := t.GetItem(item)
