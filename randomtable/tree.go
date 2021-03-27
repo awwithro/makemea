@@ -80,11 +80,14 @@ func (t *Tree) ListTables(prefix string, showHidden bool) []string {
 }
 
 // GetItem retreieves an item from a table and will render any items
-// that include templates. Wraps getItem for loop detection
+// that include templates.
 func (t *Tree) GetItem(table string) (string, error) {
-
-	item, err := t.getItem(table)
-	return item, err
+	tb, err := t.GetTable(table)
+	if err != nil {
+		return "", err
+	}
+	item := tb.GetItem()
+	return t.renderItem(item, table)
 }
 
 // renderItem will render any templates for a given item. Table is the path the item was
@@ -144,7 +147,7 @@ func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) (stri
 
 		result := []string{}
 		for x := 1; x <= times; x++ {
-			i, err := t.getItem(item)
+			i, err := t.GetItem(item)
 			if err != nil {
 				return "", err
 			}
@@ -162,15 +165,6 @@ func (t *Tree) roll(d string) string {
 		return d
 	}
 	return strconv.Itoa(result.Int())
-}
-
-func (t *Tree) getItem(table string) (string, error) {
-	tb, err := t.GetTable(table)
-	if err != nil {
-		return "", err
-	}
-	item := tb.GetItem()
-	return t.renderItem(item, table)
 }
 
 func (t *Tree) ValidateTables() {
