@@ -8,6 +8,7 @@ import (
 
 	v1 "github.com/awwithro/makemea/api/v1"
 	"github.com/awwithro/makemea/randomtable"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/slack-go/slack"
 )
@@ -15,6 +16,13 @@ import (
 // NewServer returns a gin server that will serve items from the given tree
 func NewServer(tree *randomtable.Tree) *gin.Engine {
 	e := gin.Default()
+	e.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 	AttachHandlers(e, tree)
 	return e
 }

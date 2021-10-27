@@ -1,5 +1,9 @@
 package randomtable
 
+import (
+	"github.com/olekukonko/tablewriter"
+)
+
 type TextTable struct {
 	text string
 }
@@ -18,6 +22,12 @@ func (t TextTable) AllItems() []string {
 
 func (t TextTable) Validate() {
 
+}
+
+func (t TextTable) GetTable(tb *tablewriter.Table, name string) *tablewriter.Table {
+	tb.Append([]string{t.text})
+	tb.SetHeader([]string{t.text})
+	return tb
 }
 
 func NewTextTable() TextTable {

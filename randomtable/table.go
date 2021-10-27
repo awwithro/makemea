@@ -3,6 +3,8 @@ package randomtable
 import (
 	"math/rand"
 	"time"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 type Table interface {
@@ -10,6 +12,7 @@ type Table interface {
 	AddItem(string, ...int)
 	Validate()
 	AllItems() []string
+	GetTable(*tablewriter.Table, string) *tablewriter.Table
 }
 
 type RandomTable struct {
@@ -32,6 +35,14 @@ func (r *RandomTable) Validate() {
 
 func (r RandomTable) AllItems() []string {
 	return r.items
+}
+
+func (r RandomTable) GetTable(t *tablewriter.Table, name string) *tablewriter.Table {
+	for _, item := range r.items {
+		t.Append([]string{item})
+	}
+	t.SetHeader([]string{name})
+	return t
 }
 
 func NewRandomTable() RandomTable {

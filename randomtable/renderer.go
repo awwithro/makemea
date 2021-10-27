@@ -63,7 +63,6 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 		var table Table
 		// The first cell cotnains the name of the table
 		tablename := string(n.FirstChild().Text(source))
-
 		// Push the header into the namespace when entering the header
 		r.Push(tablename)
 		// A single header cell is a regular table
@@ -148,6 +147,7 @@ func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byt
 		if err != nil {
 			return ast.WalkContinue, err
 		}
+		// FIXME: Only hide if this is the header cell
 		t.Hidden = true
 		r.tree.tables.Put(r.Name(), t)
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/awwithro/makemea/util"
 	"github.com/justinian/dice"
+	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -68,6 +69,14 @@ func (r *RollingTable) Validate() {
 	for _, roll := range diff {
 		r.log.Warnf("%v is not rollable", roll)
 	}
+}
+
+func (r RollingTable) GetTable(t *tablewriter.Table, name string) *tablewriter.Table {
+	for roll, item := range r.items {
+		t.Append([]string{item, strconv.Itoa(roll)})
+	}
+	t.SetHeader([]string{name, r.dicestr})
+	return t
 }
 
 func NewRollingTable(d string) RollingTable {
