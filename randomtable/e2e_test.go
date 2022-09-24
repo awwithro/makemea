@@ -201,6 +201,28 @@ func TestHeaderLookups(t *testing.T) {
 				"four",
 			},
 		},
+		{
+			table: `	
+| t1    | 1d4 |
+| ----- | --- |
+| one   | 1   |
+| two   | 2   |
+| three | 3   |
+| four  | 4   |
+| five  | 5   |
+| six   | 6   |
+
+
+| t2                   |
+| -------------------- |
+| {{fudge "t1" "4d1" 2}} |
+			`,
+			name:      "Test fudge works on a roll table with a count",
+			tablePath: "t2",
+			expected: []string{
+				"four, four",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()

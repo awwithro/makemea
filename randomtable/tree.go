@@ -180,13 +180,30 @@ func (t *Tree) ValidateTables() {
 }
 
 // fudge performs a lookup on the given table but uses and alternate dice string
-func (t *Tree) getFudge(callingTable string) func(string, string) (string, error) {
-	return func(table, dicestr string) (string, error) {
+func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}) (string, error) {
+	return func(table, dicestr string, rolls ...interface{}) (string, error) {
 		table = resolvePaths(callingTable, table)
 		tb, err := t.GetTable(table)
 		if err != nil {
 			return "", err
 		}
+		var times int
+		// rolls represent more than a sinlge item being looked up
+		if len(rolls) == 0 {
+			times = 1
+		} else {
+			var err error
+			switch r := rolls[0].(type) {
+			case string:
+				times, err = strconv.Atoi(r)
+				if err != nil {
+					times = 1
+				}
+			case int:
+				times = r
+			}
+		}
+
 		var newTable = NewRollingTable(dicestr)
 		switch rt := tb.Table.(type) {
 		case *RollingTable:
@@ -195,8 +212,12 @@ func (t *Tree) getFudge(callingTable string) func(string, string) (string, error
 			}
 			newTable.dicestr = dicestr
 		}
-		item := newTable.GetItem()
-		return t.renderItem(item, table)
+		result := []string{}
+		for x := 1; x <= times; x++ {
+			i := newTable.GetItem()
+			result = append(result, i)
+		}
+		return strings.Join(result, ", "), nil
 	}
 }
 

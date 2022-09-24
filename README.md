@@ -105,6 +105,13 @@ The `fudge` function works similar to the `lookup` function but allows you to pr
 | ----------------------------------------------------- |
 | {{fudge "makemea/tables/dicetable/treasure" "1d3+3"}} |
 
+The `fudge` function also supports the optional count argument like `lookup` does. Try it with: `makemea makemea/templates/fudge/goldorsilvermultiple`
+
+| Gold or Silver Multiple                                 |
+| ------------------------------------------------------- |
+| {{fudge "makemea/tables/dicetable/treasure" "1d3+3" 2}} |
+
+
 ### Combining Templates
 
 `roll` and `lookup` can be combined useing variables to lookup a value from another table a random number of times. The following table does the following:
@@ -159,7 +166,7 @@ Try it with `./makemea "makemea/variables/npc"`
 
 ## Text
 
-Its not quite a table but sometimes you want to generate something that perfoms lookups on other tables. Something like an NPC. It would be cumbersome to stuff everything into a table sell. Instead you can use a fenced code block. Here, the npc example from above has been redone using a code block. The result is much easier to undersatnd and maintain. Try it with `makemea makemea/text/npc`
+Its not quite a table but sometimes you want to generate something that perfoms lookups on other tables. Something like an NPC. It would be cumbersome to stuff everything into a table cell. Instead you can use a fenced code block. Here, the npc example from above has been redone using a code block. The result is much easier to undersatnd and maintain. Try it with `makemea makemea/text/npc`
 
 ``` npc
 {{$r:=lookup "makemea/variables/race" -}}
