@@ -1,9 +1,11 @@
-
 #!/usr/bin/env bash
+set -x
+set -euo pipefail
+
 BUILD_TIME=$(date +"%Y%m%d.%H%M%S")
-CommitHash=$(git describe | cut -d- -f3)
+CommitHash=$(git rev-parse HEAD)
 GoVersion=$(go version | cut -c 14- | cut -d' ' -f1)
-GitTag=$(git describe | cut -d- -f1)
+GitTag=$(git describe --tags)
 
 TRG_PKG="github.com/awwithro/makemea/cmd"
 FLAG="-X $TRG_PKG.BuildTime=$BUILD_TIME"
