@@ -111,6 +111,39 @@ func TestHeaderLookups(t *testing.T) {
 		},
 		{
 			table: `
+# Things
+
+| 1d4 | fancy  |
+| --- | ---    |
+| 1   | Dagger |
+| 2   | Coin   |
+| 3   | Gem    |
+| 4   | Sword  |
+`,
+			tablePath: "things/fancy",
+			name:      "roll column can be anywhere",
+			expected: []string{
+				"Dagger", "Coin", "Gem", "Sword",
+			},
+		},
+		{
+			table: `
+
+| 1d4 | fancy  | another|
+| --- | ---    | ---    |
+| 1   | Dagger | Dagger |
+| 2   | Coin   | Coin   |
+| 3   | Gem    | Gem    |
+| 4   | Sword  | Sword  |
+`,
+			tablePath: "another",
+			name:      "more than one table with a roll column can be used",
+			expected: []string{
+				"Dagger", "Coin", "Gem", "Sword",
+			},
+		},
+		{
+			table: `
 # Nested
 
 | Lookup               |
@@ -223,6 +256,22 @@ func TestHeaderLookups(t *testing.T) {
 				"four, four",
 			},
 		},
+		{
+			table:     multiTable,
+			name:      "Test we can have two tables in one",
+			tablePath: "t1",
+			expected: []string{
+				"one",
+			},
+		},
+		{
+			table:     multiTable,
+			name:      "Test we can have two tables in one",
+			tablePath: "t2",
+			expected: []string{
+				"two",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
@@ -272,6 +321,28 @@ func TestListTables(t *testing.T) {
 				"h1/t2", "h1/t3", "h1/h2/t4",
 			},
 		},
+		{
+			table:     multiTable,
+			tablePath: "",
+			name:      "Test multiple rollTables in a markdown table",
+			expected: []string{
+				"t1", "t2",
+			},
+		},
+		{
+			table:     multiRoller,
+			tablePath: "",
+			name:      "Test multiple rollTables in a table w/ dice column",
+			expected: []string{
+				"t1", "t2",
+			},
+		},
+		{
+			table:     hiddenText,
+			tablePath: "",
+			name:      "Test text blocks can be hidden",
+			expected:  []string{},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
@@ -314,3 +385,14 @@ const listTest = `
 | --- |
 
 `
+const multiTable = `
+|t1 |t2 |
+|---|---|
+|one|two|
+`
+const multiRoller = `
+|t1 |t2 |1d1|
+|---|---|---|
+|one|two|1  |
+`
+const hiddenText = "``` _test_\n```"
