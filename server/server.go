@@ -10,6 +10,7 @@ import (
 	"github.com/awwithro/makemea/randomtable"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/justinian/dice"
 	"github.com/slack-go/slack"
 )
 
@@ -31,6 +32,7 @@ func AttachHandlers(e *gin.Engine, tree *randomtable.Tree) {
 	v1 := e.Group("v1")
 	v1.GET("/items/*path", getFunc(tree))
 	v1.GET("/tables/*path", listFunc(tree))
+	v1.GET("/roll/*roll", rollFunc())
 	e.POST("/slack/events", slashCommandFunc(tree))
 }
 
@@ -53,9 +55,24 @@ func getFunc(tree *randomtable.Tree) func(*gin.Context) {
 		item, err := tree.GetItem(path)
 		if err != nil {
 			c.String(http.StatusNotFound, err.Error())
+			return
 		}
 		c.JSON(http.StatusOK, v1.GetItemResponse{
 			Item: item,
+		})
+	}
+}
+func rollFunc() func(*gin.Context) {
+	return func(c *gin.Context) {
+		roll := c.Param("roll")
+		result, _, err := dice.Roll(roll)
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, v1.RollResponse{
+			Result:      result.Int(),
+			Description: result.Description(),
 		})
 	}
 }

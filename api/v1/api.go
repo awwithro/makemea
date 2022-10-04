@@ -7,3 +7,8 @@ type ListTableResponse struct {
 type GetItemResponse struct {
 	Item string `json:"item"`
 }
+
+type RollResponse struct {
+	Result      int    `json:"result"`
+	Description string `json:"description"`
+}
