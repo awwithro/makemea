@@ -36,7 +36,7 @@ func NewTree() Tree {
 
 // AddTable adds the given table with the given name.
 // Names have spaces removed and turned to lowercase
-func (t *Tree) AddTable(name string, table Table) {
+func (t *Tree) AddTable(name string, table Table, hidden bool) {
 	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
 
 	// check for existing table
@@ -46,7 +46,7 @@ func (t *Tree) AddTable(name string, table Table) {
 		log.WithField("table", name).Warn("Duplicate table entered")
 	}
 
-	t.tables.Put(name, TableNode{Table: table})
+	t.tables.Put(name, TableNode{Table: table, Hidden: hidden})
 }
 
 // GetTable returns the table with the given name in the tree

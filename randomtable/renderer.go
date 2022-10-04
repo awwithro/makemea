@@ -107,11 +107,11 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 			}
 			if diceRoll == "" {
 				t := NewRandomTable()
-				r.tree.AddTable(name, &t)
+				r.tree.AddTable(name, &t, false)
 			} else {
 				t := NewRollingTable(diceRoll).WithLogger(
 					log.WithFields(log.Fields{"table": name}))
-				r.tree.AddTable(name, &t)
+				r.tree.AddTable(name, &t, false)
 			}
 		}
 	}
@@ -203,13 +203,19 @@ func (r *randomTableRenderer) renderHeading(writer util.BufWriter, source []byte
 
 func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
+		// emphasis -> cell -> Header == this is a table name
+		switch node.Parent().Parent().(type) {
+		case *gast.TableHeader, *ast.FencedCodeBlock:
+			break
+		default:
+			return ast.WalkContinue, nil
+		}
 		name := string(node.Text(source))
 		name = r.Name(name)
 		t, err := r.tree.GetTable(name)
 		if err != nil {
 			return ast.WalkContinue, err
 		}
-		// FIXME: Only hide if this is the header cell
 		t.Hidden = true
 		r.tree.tables.Put(name, t)
 	}
@@ -225,26 +231,22 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 			return ast.WalkContinue, nil
 		}
 		t := NewTextTable()
-		title := r.Name(string(n.Language(source)))
-		hide := false
+		title := string(n.Language(source))
+		hidden := false
 		// The table should be marked as hidden
 		if strings.HasPrefix(title, "_") && strings.HasSuffix(title, "_") {
 			title = strings.TrimPrefix(title, "_")
 			title = strings.TrimSuffix(title, "_")
-			hide = true
+			hidden = true
 		}
+		title = r.Name(title)
 		// Combine all the lines into a single string and use that for the table Item
 		var result string
 		for _, line := range n.Lines().Sliced(0, n.Lines().Len()) {
 			result += string(line.Value(source))
 		}
 		t.AddItem(result)
-		r.tree.AddTable(title, &t)
-		if hide {
-			tb, _ := r.tree.GetTable(title)
-			tb.Hidden = true
-			r.tree.tables.Put(title, tb)
-		}
+		r.tree.AddTable(title, &t, hidden)
 	}
 
 	return ast.WalkContinue, nil
