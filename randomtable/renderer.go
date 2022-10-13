@@ -69,6 +69,7 @@ func (r *randomTableRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegiste
 	reg.Register(ast.KindHeading, r.renderHeading)
 	reg.Register(ast.KindEmphasis, r.renderEmphasis)
 	reg.Register(ast.KindFencedCodeBlock, r.renderFencedCodeBlock)
+	reg.Register(ast.KindLink, r.renderLink)
 }
 
 func (r *randomTableRenderer) parseHeaderCell(cell ast.Node, col int, source []byte) string {
@@ -249,5 +250,22 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 		r.tree.AddTable(title, &t, hidden)
 	}
 
+	return ast.WalkContinue, nil
+}
+
+func (r *randomTableRenderer) renderLink(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		// link -> Header == this is a valid alias
+		// switch node.Parent().(type) {
+		// case *gast.TableHeader, *ast.FencedCodeBlock:
+		// 	break
+		// default:
+		// 	return ast.WalkContinue, nil
+		// }
+		n := node.(*ast.Link)
+		label := string(n.Text(source))
+		url := string(n.Destination)
+		r.tree.AddLink(r.Name(label), url)
+	}
 	return ast.WalkContinue, nil
 }

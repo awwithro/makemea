@@ -28,6 +28,11 @@ type TableNode struct {
 	Hidden bool
 }
 
+// A link to another table
+type LinkNode struct {
+	Link string
+}
+
 func NewTree() Tree {
 	return Tree{
 		tables:         trie.NewPathTrie(),
@@ -51,6 +56,20 @@ func (t *Tree) AddTable(name string, table Table, hidden bool) {
 	t.tables.Put(name, TableNode{Table: table, Hidden: hidden})
 }
 
+// AddLink adds a reference to another table
+func (t *Tree) AddLink(name, table string) {
+	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
+
+	// check for existing table
+	_, err := t.GetItem(name)
+	// no err means we got a table
+	if err == nil {
+		log.WithField("table", name).Warn("Duplicate table entered")
+	}
+
+	t.tables.Put(name, LinkNode{Link: table})
+}
+
 // GetTable returns the table with the given name in the tree
 func (t *Tree) GetTable(name string) (TableNode, error) {
 	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
@@ -58,11 +77,18 @@ func (t *Tree) GetTable(name string) (TableNode, error) {
 	if table == nil {
 		return TableNode{}, fmt.Errorf("%s table not found", name)
 	}
-	tb := table.(TableNode)
-	switch tableTyped := tb.Table.(type) {
+	switch tb := table.(type) {
+	case TableNode:
+		switch tableTyped := tb.Table.(type) {
+		default:
+			tb.Table = tableTyped
+			return tb, nil
+		}
+	case LinkNode:
+		linkedTable, err := t.GetTable(tb.Link)
+		return linkedTable, err
 	default:
-		tb.Table = tableTyped
-		return tb, nil
+		return TableNode{}, fmt.Errorf("Unkown Table Node: %v", tb)
 	}
 }
 
@@ -71,10 +97,17 @@ func (t *Tree) GetTable(name string) (TableNode, error) {
 func (t *Tree) ListTables(prefix string, showHidden bool) []string {
 	tables := sort.StringSlice{}
 	t.tables.Walk(func(key string, value interface{}) error {
-		tb, ok := value.(TableNode)
-		if ok && strings.HasPrefix(key, prefix) && (showHidden || !tb.Hidden) {
-			tables = append(tables, key)
+		switch tb := value.(type) {
+		case TableNode:
+			if strings.HasPrefix(key, prefix) && (showHidden || !tb.Hidden) {
+				tables = append(tables, key)
+			}
+		case LinkNode:
+			if strings.HasPrefix(key, prefix) {
+				tables = append(tables, key)
+			}
 		}
+
 		return nil
 	})
 	tables.Sort()

@@ -272,6 +272,24 @@ func TestHeaderLookups(t *testing.T) {
 				"two",
 			},
 		},
+		{
+			table: `
+# Nested
+
+[link](nested/subnest/table)
+
+## Subnest
+
+| Table |
+| ------|
+| Bar   |
+`,
+			name:      "Test links to other tables work",
+			tablePath: "nested/link",
+			expected: []string{
+				"Bar",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
@@ -342,6 +360,14 @@ func TestListTables(t *testing.T) {
 			tablePath: "",
 			name:      "Test text blocks can be hidden",
 			expected:  []string{},
+		},
+		{
+			table:     linkTest,
+			tablePath: "",
+			name:      "Test links are listed",
+			expected: []string{
+				"t1", "t2",
+			},
 		},
 	}
 	for _, tc := range tests {
@@ -443,4 +469,9 @@ const nestedTable = `
 | t2  |
 | --- |
 | two |
+`
+const linkTest = `
+[t1](t2)
+|t2|
+|---|
 `

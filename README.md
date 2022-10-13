@@ -56,6 +56,10 @@ Sometimes, you'll have a bunch of subtables that are used by a parent table. If 
 | Mystery  |
 | Illusion |
 
+You can also use links to point to other tables. The name of the link becomes the name of the new table and the destination of the link will be used when selected. The same header rules apply to the link as well. Try it with `makemea makemea/organizing/link`. It will roll on the race table above.
+
+[link](makemea/tables/lookuptable/race)
+
 ## Templates
 
 There are a few template functions that can be used to allow for more complex table behavior. Under the hood, golang templates are used. The syntax will be familiar to go programmers but is easy enough for anyone to follow. It also allows for the use of conditionals, loops, and other templating functions.
