@@ -79,6 +79,8 @@ func rollFunc() func(*gin.Context) {
 
 func slashCommandFunc(tree *randomtable.Tree) func(*gin.Context) {
 	return func(c *gin.Context) {
+		newTree := tree.WithStringFormatter()
+		tree = &newTree
 		s, err := slack.SlashCommandParse(c.Request)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, SlackResponse{

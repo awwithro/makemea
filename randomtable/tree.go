@@ -19,6 +19,7 @@ import (
 type Tree struct {
 	tables         *trie.PathTrie
 	maxLookupDepth int
+	formatter      Formatter
 }
 
 // TableNode embeds the table that was created and adds meta-data for use in the tree
@@ -31,6 +32,7 @@ func NewTree() Tree {
 	return Tree{
 		tables:         trie.NewPathTrie(),
 		maxLookupDepth: 100,
+		formatter:      StringFormatter{},
 	}
 }
 
@@ -87,6 +89,7 @@ func (t *Tree) GetItem(table string) (string, error) {
 		return "", err
 	}
 	item := tb.GetItem()
+	item = t.formatter.Format(item, table)
 	return t.renderItem(item, table)
 }
 
@@ -119,25 +122,9 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 // It uses a closure to provide the calling table to allow relative pathing
 func (t *Tree) getLookup(callingTable string) func(string, ...interface{}) (string, error) {
 	return func(item string, rolls ...interface{}) (string, error) {
-		// number of times to roll
-		var times int
 		item = resolvePaths(callingTable, item)
-
-		// rolls represent more than a sinlge item being looked up
-		if len(rolls) == 0 {
-			times = 1
-		} else {
-			var err error
-			switch r := rolls[0].(type) {
-			case string:
-				times, err = strconv.Atoi(r)
-				if err != nil {
-					times = 1
-				}
-			case int:
-				times = r
-			}
-		}
+		// number of times to roll
+		times := parseRollCount(rolls)
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i, err := t.GetItem(item)
@@ -187,23 +174,7 @@ func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}
 		if err != nil {
 			return "", err
 		}
-		var times int
-		// rolls represent more than a sinlge item being looked up
-		if len(rolls) == 0 {
-			times = 1
-		} else {
-			var err error
-			switch r := rolls[0].(type) {
-			case string:
-				times, err = strconv.Atoi(r)
-				if err != nil {
-					times = 1
-				}
-			case int:
-				times = r
-			}
-		}
-
+		times := parseRollCount(rolls)
 		var newTable = NewRollingTable(dicestr)
 		switch rt := tb.Table.(type) {
 		case *RollingTable:
@@ -215,7 +186,7 @@ func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i := newTable.GetItem()
-			result = append(result, i)
+			result = append(result, t.formatter.Format(i, table))
 		}
 		return strings.Join(result, ", "), nil
 	}
@@ -229,4 +200,23 @@ func resolvePaths(callingTable, table string) string {
 		table = strings.Replace(table, "./", tablePrefix+"/", 1)
 	}
 	return table
+}
+
+func parseRollCount(rolls []interface{}) int {
+	var times int
+	if len(rolls) == 0 {
+		times = 1
+	} else {
+		var err error
+		switch r := rolls[0].(type) {
+		case string:
+			times, err = strconv.Atoi(r)
+			if err != nil {
+				times = 1
+			}
+		case int:
+			times = r
+		}
+	}
+	return times
 }

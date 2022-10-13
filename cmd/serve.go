@@ -25,7 +25,7 @@ func init() {
 }
 
 func serveCommand(cmd *cobra.Command, args []string) {
-	tree := MustGetTree()
+	tree := MustGetTree().WithHtmlFormatter()
 	tree.ValidateTables()
 	srv := server.NewServer(&tree)
 	ticker := time.NewTicker(5 * time.Second)

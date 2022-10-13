@@ -365,6 +365,44 @@ func TestListTables(t *testing.T) {
 	}
 }
 
+func TestHtmlFormattedTables(t *testing.T) {
+	tests := []TestCases{
+		{
+			table:     multiTable,
+			tablePath: "t1",
+			name:      "Test Html gets formatted properly",
+			expected: []string{
+				"<randomElement table='t1'>one</randomElement>",
+			},
+		},
+		{
+			table:     nestedTable,
+			tablePath: "t1",
+			name:      "Test Nested Html gets formatted properly",
+			expected: []string{
+				"<randomElement table='t1'>one: <randomElement table='t2'>two</randomElement></randomElement>",
+			},
+		},
+	}
+	for _, tc := range tests {
+		tree := NewTree().WithHtmlFormatter()
+		md := goldmark.New(
+			goldmark.WithExtensions(extension.GFM),
+			goldmark.WithRendererOptions(
+				renderer.WithNodeRenderers(
+					util.Prioritized(NewRandomTableRenderer(tree), 1))),
+		)
+		var buf bytes.Buffer
+		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
+			t.Error(err)
+		}
+		actual, _ := tree.GetItem(tc.tablePath)
+		if !reflect.DeepEqual([]string{actual}, tc.expected) {
+			t.Errorf("%s: Expected to find %s but got %s.", tc.name, tc.expected, actual)
+		}
+	}
+}
+
 const listTest = `
 | t1  |
 | --- |
@@ -396,3 +434,13 @@ const multiRoller = `
 |one|two|1  |
 `
 const hiddenText = "``` _test_\n```"
+
+const nestedTable = `
+| t1  |
+| --- |
+| one: {{lookup "t2" }}|
+
+| t2  |
+| --- |
+| two |
+`
