@@ -472,6 +472,8 @@ const nestedTable = `
 `
 const linkTest = `
 [t1](t2)
+[t3](http://url.com)
+[t3](https://url.com)
 |t2|
 |---|
 `
