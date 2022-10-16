@@ -39,7 +39,7 @@ func serveCommand(cmd *cobra.Command, args []string) {
 				newHash, _ := dirhash.HashDir(dir, "", dirhash.DefaultHash)
 				if hash != newHash {
 					log.Print("Files have changed, reloading tables")
-					newTree := MustGetTree()
+					newTree := MustGetTree().WithHtmlFormatter()
 					*&tree = newTree
 					hash = newHash
 				}

@@ -256,15 +256,13 @@ func (r *randomTableRenderer) renderFencedCodeBlock(writer util.BufWriter, sourc
 func (r *randomTableRenderer) renderLink(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
 		// link -> Header == this is a valid alias
-		// switch node.Parent().(type) {
-		// case *gast.TableHeader, *ast.FencedCodeBlock:
-		// 	break
-		// default:
-		// 	return ast.WalkContinue, nil
-		// }
 		n := node.(*ast.Link)
 		label := string(n.Text(source))
 		url := string(n.Destination)
+		// Ignore links to websites
+		if strings.HasPrefix(url, "http") {
+			return ast.WalkContinue, nil
+		}
 		r.tree.AddLink(r.Name(label), url)
 	}
 	return ast.WalkContinue, nil
