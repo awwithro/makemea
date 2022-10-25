@@ -219,7 +219,8 @@ func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i := newTable.GetItem()
-			result = append(result, t.formatter.Format(i, table))
+			item, _ := t.renderItem(i, table)
+			result = append(result, t.formatter.Format(item, table))
 		}
 		return strings.Join(result, ", "), nil
 	}
