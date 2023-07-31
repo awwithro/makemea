@@ -236,6 +236,28 @@ func TestHeaderLookups(t *testing.T) {
 		},
 		{
 			table: `	
+| t1    |
+| ----- |
+| one   |
+| two   |
+| three |
+| four  |
+| five  |
+| six   |
+
+
+| t2                   |
+| -------------------- |
+| {{fudge "t1" "4d1"}} |
+			`,
+			name:      "Test fudge works on a non-rolling table",
+			tablePath: "t2",
+			expected: []string{
+				"four",
+			},
+		},
+		{
+			table: `	
 | t1    | 1d4 |
 | ----- | --- |
 | one   | 1   |

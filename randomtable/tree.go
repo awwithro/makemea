@@ -215,7 +215,14 @@ func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}
 				newTable.items[k] = v
 			}
 			newTable.dicestr = dicestr
+		// Wonky as items is two different types in these tables
+		case *RandomTable:
+			for k, v := range rt.items {
+				newTable.items[k+1] = v
+			}
+			newTable.dicestr = dicestr
 		}
+
 		result := []string{}
 		for x := 1; x <= times; x++ {
 			i := newTable.GetItem()
