@@ -3,6 +3,7 @@ package randomtable
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -133,6 +134,7 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 		"lookup": t.getLookup(table),
 		"roll":   t.roll,
 		"fudge":  t.getFudge(table),
+		"pick": pickItem,
 	}
 	mergedFuncMaps := sprig.FuncMap()
 	for k, v := range funcMap {
@@ -149,6 +151,10 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 	}
 	return buf.String(), nil
 
+}
+
+func pickItem(items ...string) string {
+	return items[rand.Intn(len(items))]
 }
 
 // getLookup provides a function for retrieving items from other tables.

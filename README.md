@@ -115,6 +115,14 @@ The `fudge` function also supports the optional count argument like `lookup` doe
 | ------------------------------------------------------- |
 | {{fudge "makemea/tables/dicetable/treasure" "1d3+3" 2}} |
 
+### pickup
+
+Use the `pickup` function to get a quick random result from a list of values.
+
+| Monster                                                      |
+| ------------------------------------------------------------ |
+| The monster has the head of a {{pick "lion" "tiger" "wolf"}} |
+
 ### Combining Templates
 
 `roll` and `lookup` can be combined useing variables to lookup a value from another table a random number of times. The following table does the following:

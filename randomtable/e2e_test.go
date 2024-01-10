@@ -312,6 +312,18 @@ func TestHeaderLookups(t *testing.T) {
 				"Bar",
 			},
 		},
+		{
+			table: `
+| t1 |
+| --- |
+| test{{pick "ing" "s" "ed"}} |
+`,
+			name: "Test pick item template",
+			tablePath: "t1",
+			expected: []string{
+				"testing","tests","tested",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
@@ -327,7 +339,7 @@ func TestHeaderLookups(t *testing.T) {
 		}
 		actual, err := tree.GetItem(tc.tablePath)
 		if err != nil {
-			t.Errorf("Test: %v, Error: %v", tc.name, err)
+			t.Errorf("Test: %v, Error: %v. Found: %v", tc.name, err, tree.ListTables("", true))
 		}
 		found := false
 		for _, exepctedItem := range tc.expected {
@@ -340,7 +352,6 @@ func TestHeaderLookups(t *testing.T) {
 			t.Errorf("%s Expected to find one of %s but got %s", tc.name, tc.expected, actual)
 		}
 	}
-
 }
 
 func TestListTables(t *testing.T) {
