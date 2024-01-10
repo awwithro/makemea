@@ -36,7 +36,7 @@ A Dice table has different probabilities for each item on the table. The number 
 
 ## Organizing
 
-Every table has a name. This name is used to tell MakeMeA which table to roll on. When you have a lot of tables, organization is key. Makemea will search the current folder and subfolders for markdown files and attempt to convert any markdown tables found into tables to roll on. MakeMeA uses headers to nest tables to allow for tables to be organized. When a table is placed under a header, that header is prefixed to the table name with a "/". When a table is nested under headers and subheaders, all the headers are combined with the table name. This lets you group related tables under a header to make them easier to find. For intsance the following table can be located with the name: `makemea/organizing/weapons`
+Every table has a name. This name is used to tell MakeMeA which table to roll on. When you have a lot of tables, organization is key. Makemea will search the current folder and sub-folders for markdown files and attempt to convert any markdown tables found into tables to roll on. MakeMeA uses headers to nest tables to allow for tables to be organized. When a table is placed under a header, that header is prefixed to the table name with a "/". When a table is nested under headers and sub-headers, all the headers are combined with the table name. This lets you group related tables under a header to make them easier to find. For instance the following table can be located with the name: `makemea/organizing/weapons`
 
 | Weapons |
 | ------- |
@@ -48,7 +48,7 @@ Every table has a name. This name is used to tell MakeMeA which table to roll on
 
 You can see all of the tables that MakeMeA has detected by using the `list` command. Try it with: `makemea list`
 
-Sometimes, you'll have a bunch of subtables that are used by a parent table. If the subtables aren't meant to be used on their own, you can hide them from the listing view by italicizing the name of the table. Notice that while the below table doesn't show up under the `list` command, it is still accessable via `makemea makemea/organizing/hidden`
+Sometimes, you'll have a bunch of sub-tables that are used by a parent table. If the sub-tables aren't meant to be used on their own, you can hide them from the listing view by italicizing the name of the table. Notice that while the below table doesn't show up under the `list` command, it is still accessible via `makemea makemea/organizing/hidden`
 
 | _hidden_ |
 | -------- |
@@ -84,7 +84,7 @@ When you have a large hierarchy of deeply-nested tables, it can be cumbersome to
 | Glittering {{ lookup "./fancy"}}                  |
 | Sparkling {{ lookup "./fancy"}}                   |
 
-`lookup` also allows an for an optional argument for performing the same lookup multiple times. The following table will result in three itmes being selected from the `fancier` table: `makemea makemea/templates/lookup/count`
+`lookup` also allows an for an optional argument for performing the same lookup multiple times. The following table will result in three items being selected from the `fancier` table: `makemea makemea/templates/lookup/count`
 
 | Count                    |
 | ------------------------ |
@@ -125,11 +125,12 @@ Use the `pickup` function to get a quick random result from a list of values.
 
 ### Combining Templates
 
-`roll` and `lookup` can be combined useing variables to lookup a value from another table a random number of times. The following table does the following:
+`roll` and `lookup` can be combined using variables to lookup a value from another table a random number of times. The following table does the following:
 
 1. Rolls 2d4
 2. Stores the result in a variable named "r"
-3. Calls the lookup function and uses the value of "r" to perform the lookup 2 - 8
+3. Calls the lookup function and uses the value of "r" to perform the lookup
+4. The result will be a list of 2 - 8 creatures
 
 Try it with `makemea "makemea/templates/combiningtemplates/encounter"`
 
@@ -142,7 +143,7 @@ Try it with `makemea "makemea/templates/combiningtemplates/encounter"`
 More complex lookups can be done by using a variable to lookup a table based on the result of another lookup. In this example, an npc is generated on a single table. This is done by:
 
 1. Doing a lookup of the Race table
-2. Storing the result of the lookup into the variabls `$r`
+2. Storing the result of the lookup into the variables `$r`
 3. Using the `$r` variable to determine which name table to use
 4. Printing out an NPC using both the race and name generated
 
@@ -177,14 +178,14 @@ Try it with `./makemea "makemea/variables/npc"`
 
 ## Text
 
-Its not quite a table but sometimes you want to generate something that perfoms lookups on other tables. Something like an NPC. It would be cumbersome to stuff everything into a table cell. Instead you can use a fenced code block. Here, the npc example from above has been redone using a code block. The result is much easier to undersatnd and maintain. Try it with `makemea makemea/text/npc`
+Its not quite a table but sometimes you want to generate something that performs lookups on other tables. Something like an NPC. It would be cumbersome to stuff everything into a table cell. Instead you can use a fenced code block. Here, the npc example from above has been redone using a code block. The result is much easier to understand and maintain. Try it with `makemea makemea/text/npc`
 
 ``` npc
-{{$r:=lookup "makemea/variables/race" -}}
-{{$name := lookup (print  "makemea/variables/" $r "/names") -}}
+{{$race:=lookup "makemea/variables/race" -}}
+{{$name := lookup (print  "makemea/variables/" $race "/names") -}}
 {{$level := roll "2d4" -}}
 Name: {{$name}}
-Race: {{$r}}
+Race: {{$race}}
 Level: {{$level}}
 HP: {{roll (print $level "d6")}}
 ```
