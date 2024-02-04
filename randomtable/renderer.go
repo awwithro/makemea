@@ -70,6 +70,8 @@ func (r *randomTableRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegiste
 	reg.Register(ast.KindEmphasis, r.renderEmphasis)
 	reg.Register(ast.KindFencedCodeBlock, r.renderFencedCodeBlock)
 	reg.Register(ast.KindLink, r.renderLink)
+	reg.Register(gast.KindDefinitionTerm, r.renderDefinitionTerm)
+	reg.Register(gast.KindDefinitionDescription, r.renderDefinitionDescription)
 }
 
 func (r *randomTableRenderer) parseHeaderCell(cell ast.Node, col int, source []byte) string {
@@ -118,6 +120,28 @@ func (r *randomTableRenderer) renderTableHeader(writer util.BufWriter, source []
 	}
 	return ast.WalkContinue, nil
 }
+func (r *randomTableRenderer) renderDefinitionTerm(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		t := NewRandomTable()
+		name := r.Name(string(n.Text(source)))
+		r.tree.AddTable(name, &t, false)
+		r.currentTableNames = []string{name}
+	}
+	return ast.WalkContinue, nil
+}
+func (r *randomTableRenderer) renderDefinitionDescription(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		text := string(n.Text(source))
+		tableName := r.currentTableNames[0]
+		table, err := r.tree.GetTable(tableName)
+		if err != nil {
+				return ast.WalkContinue, fmt.Errorf("unable to find table: %s", tableName)
+			}
+		table.AddItem(text)
+	}
+	return ast.WalkContinue, nil
+}
+
 func (r *randomTableRenderer) renderTableRow(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
 		rollColumn := -1
@@ -143,7 +167,7 @@ func (r *randomTableRenderer) renderTableRow(writer util.BufWriter, source []byt
 			childCount++
 			sib = sib.NextSibling()
 		}
-		// Take each column item and add it to the corrisponding table
+		// Take each column item and add it to the corresponding table
 		// Checks to see if we have dice rolls associated with the table
 		for x, text := range columns {
 			// we don't need to directly add the roll column to any table
@@ -155,7 +179,7 @@ func (r *randomTableRenderer) renderTableRow(writer util.BufWriter, source []byt
 			table, err := r.tree.GetTable(tableName)
 
 			if err != nil {
-				return ast.WalkContinue, fmt.Errorf("Unable to find table: %s", tableName)
+				return ast.WalkContinue, fmt.Errorf("unable to find table: %s", tableName)
 			}
 			// Not a rolling table
 			if rollColumn == -1 {

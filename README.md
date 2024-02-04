@@ -34,6 +34,16 @@ A Dice table has different probabilities for each item on the table. The number 
 | Silver   | 4-5 |
 | Gold     | 6   |
 
+### Lists
+
+In addition to using a lookup table, you can also use a definition list when you want to pick an item where each item has an equal probability. Try it with `makemea "makemea/tables/lists/class`
+
+Class
+: Warrior
+: Wizard
+: Cleric
+: Thief
+
 ## Organizing
 
 Every table has a name. This name is used to tell MakeMeA which table to roll on. When you have a lot of tables, organization is key. Makemea will search the current folder and sub-folders for markdown files and attempt to convert any markdown tables found into tables to roll on. MakeMeA uses headers to nest tables to allow for tables to be organized. When a table is placed under a header, that header is prefixed to the table name with a "/". When a table is nested under headers and sub-headers, all the headers are combined with the table name. This lets you group related tables under a header to make them easier to find. For instance the following table can be located with the name: `makemea/organizing/weapons`

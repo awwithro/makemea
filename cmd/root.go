@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -44,13 +43,13 @@ func Execute() {
 }
 
 func parseMarkdown(path string, tree randomtable.Tree) {
-	source, err := ioutil.ReadFile(path)
+	source, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var buf bytes.Buffer
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
+		goldmark.WithExtensions(extension.GFM, extension.DefinitionList),
 		goldmark.WithRendererOptions(
 			renderer.WithNodeRenderers(
 				util.Prioritized(randomtable.NewRandomTableRenderer(tree), 1))),

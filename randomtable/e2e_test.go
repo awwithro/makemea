@@ -324,11 +324,25 @@ func TestHeaderLookups(t *testing.T) {
 				"testing","tests","tested",
 			},
 		},
+		{
+			table:`
+# Nested
+
+List
+: one
+: two
+`,
+			name: "Test Definition List",
+			tablePath: "nested/list",
+			expected: []string{
+				"one", "two",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
 		md := goldmark.New(
-			goldmark.WithExtensions(extension.GFM),
+			goldmark.WithExtensions(extension.GFM,extension.DefinitionList),
 			goldmark.WithRendererOptions(
 				renderer.WithNodeRenderers(
 					util.Prioritized(NewRandomTableRenderer(tree), 1))),
