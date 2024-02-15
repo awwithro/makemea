@@ -26,7 +26,7 @@ type randomTableRenderer struct {
 
 // Push a string into the namespace
 func (r *randomTableRenderer) Push(name string) {
-	r.namespace = append(r.namespace, name)
+	r.namespace = append(r.namespace, strings.ReplaceAll(strings.ToLower(name), " ",""))
 	r.depth++
 }
 
@@ -46,10 +46,10 @@ func (r *randomTableRenderer) Namespace() string {
 func (r *randomTableRenderer) Name(name string) string {
 	fmtName := strings.ReplaceAll(strings.ToLower(name), " ", "")
 	if len(r.namespace) == 0 {
-		return fmtName
+		return name
 	}
 	newName := append(r.namespace, fmtName)
-	return strings.Join(newName, "/")
+	return strings.ToLower(strings.Join(newName, "/"))
 }
 
 func NewRandomTableRenderer(tree Tree) renderer.NodeRenderer {

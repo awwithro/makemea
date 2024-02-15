@@ -408,6 +408,8 @@ func TestListTables(t *testing.T) {
 		},
 		{
 			table: `
+# Nested
+## Levels
 _list_
 : one
 : two
@@ -418,7 +420,7 @@ two
 `,
 			tablePath: "",
 			name: "Definition Lists are hidden",
-			expected: []string{ "two",
+			expected: []string{ "nested/levels/two",
 			},
 		},
 		{
