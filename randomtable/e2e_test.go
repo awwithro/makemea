@@ -320,6 +320,18 @@ func TestHeaderLookups(t *testing.T) {
 			},
 		},
 		{
+			table: `
+| t1 |
+| --- |
+| {{chance 1.0 "fail" "pass"}} |
+`,
+			name: "Test chance item template",
+			tablePath: "t1",
+			expected: []string{
+				"pass",
+			},
+		},
+		{
 			table:`
 # Nested
 

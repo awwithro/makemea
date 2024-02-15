@@ -12,7 +12,9 @@ MakeMeA supports several types of tables
 
 ### Lookup Table
 
-A lookup table is the most simple of tables. The table has a name and every item on the table has the same probability of being selected. Try it with `makemea "makemea/tables/lookuptable/race"`
+A lookup table is the most simple of tables. The table has a name and every item on the table has the same probability of being selected. 
+
+Try it with `makemea "makemea/tables/lookuptable/race"`
 
 | Race   |
 | ------ |
@@ -26,17 +28,21 @@ A lookup table is the most simple of tables. The table has a name and every item
 
 ### Dice Table
 
-A Dice table has different probabilities for each item on the table. The number and type of dice are given as part of the table and the results of the roll are used to select an item from the table. Try it with `makemea "makemea/tables/dicetable/treasure`
+A Dice table has different probabilities for each item on the table. The number and type of dice are given as part of the table and the results of the roll are used to select an item from the table. Note, the dice column does not need to be first
 
-| Treasure | 1d6 |
-| -------- | --- |
-| Copper   | 1-3 |
-| Silver   | 4-5 |
-| Gold     | 6   |
+Try it with `makemea "makemea/tables/dicetable/treasure`
+
+| 1d6 | Treasure |
+| --- | -------- |
+| 1-3 | Copper   |
+| 4-5 | Silver   |
+| 6   | Gold     |
 
 ### Lists
 
-In addition to using a lookup table, you can also use a definition list when you want to pick an item where each item has an equal probability. Try it with `makemea "makemea/tables/lists/class`
+In addition to using a table, you can also use a definition list when you want to pick an item where each item has an equal probability. 
+
+Try it with `makemea "makemea/tables/lists/class`
 
 Class
 : Warrior
@@ -132,6 +138,20 @@ Use the `pickup` function to get a quick random result from a list of values.
 | Monster                                                      |
 | ------------------------------------------------------------ |
 | The monster has the head of a {{pick "lion" "tiger" "wolf"}} |
+
+### chance
+
+Use the `chance` function for a given element to have a certain chance of appearing. This could be done by rolling on different tables, but would get complicated quickly. 
+You must provide both a chance (0.0 - 1.0) and an option for when the chance fails.
+Also, as the pipe used to chain templates together, you'll need to quote and escape the templates.
+
+The bellow treasure will always give gold and will give platinum 50% of the time
+
+Try it with `makemea makemea/templates/chance/treasure`
+
+| Treasure|
+| --- |
+| Gold: {{ roll "3d100"}} Platinum: `{{roll "5d10" \|chance 0.50 "None"}}` |
 
 ### Combining Templates
 

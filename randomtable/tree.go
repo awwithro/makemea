@@ -135,6 +135,7 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 		"roll":   t.roll,
 		"fudge":  t.getFudge(table),
 		"pick": pickItem,
+		"chance": chance,
 	}
 	mergedFuncMaps := sprig.FuncMap()
 	for k, v := range funcMap {
@@ -155,6 +156,13 @@ func (t *Tree) renderItem(item string, table string) (string, error) {
 
 func pickItem(items ...string) string {
 	return items[rand.Intn(len(items))]
+}
+
+func chance(chance float32, fallback, original string) string{
+	if rand.Float32() <= chance{
+		return original
+	}
+	return fallback
 }
 
 // getLookup provides a function for retrieving items from other tables.
