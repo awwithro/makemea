@@ -9,10 +9,6 @@ import (
 	"github.com/awwithro/makemea/randomtable"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
 )
 
 var rootCmd = &cobra.Command{
@@ -48,12 +44,7 @@ func parseMarkdown(path string, tree randomtable.Tree) {
 		log.Fatal(err)
 	}
 	var buf bytes.Buffer
-	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.DefinitionList),
-		goldmark.WithRendererOptions(
-			renderer.WithNodeRenderers(
-				util.Prioritized(randomtable.NewRandomTableRenderer(tree), 1))),
-	)
+	md := randomtable.NewMarkdownParser(tree)
 	if err := md.Convert(source, &buf); err != nil {
 		panic(err)
 	}

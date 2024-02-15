@@ -6,11 +6,6 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
 )
 
 type TestCases struct {
@@ -341,12 +336,7 @@ List
 	}
 	for _, tc := range tests {
 		tree := NewTree()
-		md := goldmark.New(
-			goldmark.WithExtensions(extension.GFM,extension.DefinitionList),
-			goldmark.WithRendererOptions(
-				renderer.WithNodeRenderers(
-					util.Prioritized(NewRandomTableRenderer(tree), 1))),
-		)
+		md := NewMarkdownParser(tree)
 		var buf bytes.Buffer
 		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
 			t.Error(err)
@@ -416,15 +406,36 @@ func TestListTables(t *testing.T) {
 				"t1", "t2",
 			},
 		},
+		{
+			table: `
+_list_
+: one
+: two
+
+two
+: one
+: tow
+`,
+			tablePath: "",
+			name: "Definition Lists are hidden",
+			expected: []string{ "two",
+			},
+		},
+		{
+			table: `
+LIST
+: one
+: two
+`,
+			tablePath: "",
+			name: "Titles not case sensitive",
+			expected: []string{ "list",
+			},
+		},
 	}
 	for _, tc := range tests {
 		tree := NewTree()
-		md := goldmark.New(
-			goldmark.WithExtensions(extension.GFM),
-			goldmark.WithRendererOptions(
-				renderer.WithNodeRenderers(
-					util.Prioritized(NewRandomTableRenderer(tree), 1))),
-		)
+		md := NewMarkdownParser(tree)
 		var buf bytes.Buffer
 		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
 			t.Error(err)
@@ -459,12 +470,7 @@ func TestHtmlFormattedTables(t *testing.T) {
 	}
 	for _, tc := range tests {
 		tree := NewTree().WithHtmlFormatter()
-		md := goldmark.New(
-			goldmark.WithExtensions(extension.GFM),
-			goldmark.WithRendererOptions(
-				renderer.WithNodeRenderers(
-					util.Prioritized(NewRandomTableRenderer(tree), 1))),
-		)
+		md := NewMarkdownParser(tree)
 		var buf bytes.Buffer
 		if err := md.Convert(bytes.NewBufferString(tc.table).Bytes(), &buf); err != nil {
 			t.Error(err)

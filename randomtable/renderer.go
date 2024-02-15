@@ -44,11 +44,12 @@ func (r *randomTableRenderer) Namespace() string {
 
 // Returns the namespaced name for a given table name
 func (r *randomTableRenderer) Name(name string) string {
+	fmtName := strings.ReplaceAll(strings.ToLower(name), " ", "")
 	if len(r.namespace) == 0 {
-		return name
+		return fmtName
 	}
-	newName := append(r.namespace, name)
-	return strings.ReplaceAll(strings.ToLower(strings.Join(newName, "/")), " ", "")
+	newName := append(r.namespace, fmtName)
+	return strings.Join(newName, "/")
 }
 
 func NewRandomTableRenderer(tree Tree) renderer.NodeRenderer {
@@ -228,21 +229,27 @@ func (r *randomTableRenderer) renderHeading(writer util.BufWriter, source []byte
 
 func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
+		hideTable := false
+		switch t := node.Parent().(type) {
+		case *gast.DefinitionTerm:
+			hideTable = true
 		// emphasis -> cell -> Header == this is a table name
-		switch node.Parent().Parent().(type) {
-		case *gast.TableHeader, *ast.FencedCodeBlock:
-			break
-		default:
-			return ast.WalkContinue, nil
+		case *gast.TableCell:
+			switch t.Parent().(type){
+				case *gast.TableHeader, *ast.FencedCodeBlock:
+					hideTable = true
+			}
 		}
-		name := string(node.Text(source))
-		name = r.Name(name)
-		t, err := r.tree.GetTable(name)
-		if err != nil {
-			return ast.WalkContinue, err
+		if hideTable{
+			name := string(node.Text(source))
+			name = r.Name(name)
+			t, err := r.tree.GetTable(name)
+			if err != nil {
+				return ast.WalkContinue, err
+			}
+			t.Hidden = true
+			r.tree.tables.Put(name, t)	
 		}
-		t.Hidden = true
-		r.tree.tables.Put(name, t)
 	}
 	return ast.WalkContinue, nil
 }
