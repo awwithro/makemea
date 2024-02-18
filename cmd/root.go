@@ -81,4 +81,5 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(rollCmd)
 }
