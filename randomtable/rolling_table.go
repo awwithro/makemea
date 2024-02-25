@@ -1,9 +1,7 @@
 package randomtable
 
 import (
-	"math/rand"
 	"strconv"
-	"time"
 
 	"github.com/awwithro/makemea/util"
 	"github.com/justinian/dice"
@@ -14,7 +12,6 @@ import (
 type RollingTable struct {
 	items   map[int]string
 	dicestr string
-	seed    int
 	log     log.Entry
 }
 
@@ -83,10 +80,9 @@ func NewRollingTable(d string) RollingTable {
 	table := RollingTable{
 		items:   map[int]string{},
 		dicestr: d,
-		seed:    time.Now().Nanosecond(),
 		log:     *log.NewEntry(log.StandardLogger()),
 	}
-	rand.Seed(int64(table.seed))
+	
 	return table
 }
 

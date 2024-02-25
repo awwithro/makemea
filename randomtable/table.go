@@ -18,10 +18,11 @@ type Table interface {
 type RandomTable struct {
 	items []string
 	seed  int
+	rand *rand.Rand
 }
 
 func (r *RandomTable) GetItem() string {
-	randomIndex := rand.Intn(len(r.items))
+	randomIndex := r.rand.Intn(len(r.items))
 	return r.items[randomIndex]
 }
 
@@ -46,10 +47,12 @@ func (r RandomTable) GetTable(t *tablewriter.Table, name string) *tablewriter.Ta
 }
 
 func NewRandomTable() RandomTable {
+	seed := time.Now().Nanosecond()
 	t := RandomTable{
 		items: []string{},
-		seed:  time.Now().Nanosecond(),
+		seed:  seed,
+		rand: rand.New(rand.NewSource(int64(seed))),
 	}
-	rand.Seed(int64(t.seed))
+	
 	return t
 }
