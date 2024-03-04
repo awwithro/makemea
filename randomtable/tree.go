@@ -72,24 +72,24 @@ func (t *Tree) AddLink(name, table string) {
 }
 
 // GetTable returns the table with the given name in the tree
-func (t *Tree) GetTable(name string) (TableNode, error) {
+func (t *Tree) GetTable(name string) (TableNode, string, error) {
 	name = strings.ReplaceAll(strings.ToLower(name), " ", "")
 	table := t.tables.Get(name)
 	if table == nil {
-		return TableNode{}, fmt.Errorf("%s table not found", name)
+		return TableNode{},"", fmt.Errorf("%s table not found", name)
 	}
 	switch tb := table.(type) {
 	case TableNode:
 		switch tableTyped := tb.Table.(type) {
 		default:
 			tb.Table = tableTyped
-			return tb, nil
+			return tb, name, nil
 		}
 	case LinkNode:
-		linkedTable, err := t.GetTable(tb.Link)
-		return linkedTable, err
+		linkedTable, name, err := t.GetTable(tb.Link)
+		return linkedTable, name, err
 	default:
-		return TableNode{}, fmt.Errorf("Unkown Table Node: %v", tb)
+		return TableNode{}, "",fmt.Errorf("unknown Table Node: %v", tb)
 	}
 }
 
@@ -115,16 +115,16 @@ func (t *Tree) ListTables(prefix string, showHidden bool) []string {
 	return tables
 }
 
-// GetItem retreieves an item from a table and will render any items
+// GetItem retrieves an item from a table and will render any items
 // that include templates.
 func (t *Tree) GetItem(table string) (string, error) {
-	tb, err := t.GetTable(table)
+	tb, name, err := t.GetTable(table)
 	if err != nil {
 		return "", err
 	}
 	item := tb.GetItem()
-	item = t.formatter.Format(item, table)
-	return t.renderItem(item, table)
+	item = t.formatter.Format(item, name)
+	return t.renderItem(item, name)
 }
 
 // renderItem will render any templates for a given item. Table is the path the item was
@@ -217,7 +217,7 @@ func (t *Tree) ValidateTables() {
 func (t *Tree) getFudge(callingTable string) func(string, string, ...interface{}) (string, error) {
 	return func(table, dicestr string, rolls ...interface{}) (string, error) {
 		table = resolvePaths(callingTable, table)
-		tb, err := t.GetTable(table)
+		tb, _,err := t.GetTable(table)
 		if err != nil {
 			return "", err
 		}

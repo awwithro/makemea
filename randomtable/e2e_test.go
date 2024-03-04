@@ -309,6 +309,28 @@ func TestHeaderLookups(t *testing.T) {
 		},
 		{
 			table: `
+# Nested
+
+[link](nested/subnest/nestedlookup)
+
+## Subnest
+
+| Table |
+| ------|
+| Bar   |
+
+| NestedLookup|
+|---|
+| Test {{lookup "./table" }}|
+`,
+			name:      "Test pathing works via a link",
+			tablePath: "nested/link",
+			expected: []string{
+				"Test Bar",
+			},
+		},
+		{
+			table: `
 | t1 |
 | --- |
 | test{{pick "ing" "s" "ed"}} |
@@ -470,7 +492,7 @@ func TestHtmlFormattedTables(t *testing.T) {
 			tablePath: "t1",
 			name:      "Test Html gets formatted properly",
 			expected: []string{
-				"<randomElement table='t1'>one</randomElement>",
+				"<RandomElement table='t1'>one</RandomElement>",
 			},
 		},
 		{
@@ -478,7 +500,7 @@ func TestHtmlFormattedTables(t *testing.T) {
 			tablePath: "t1",
 			name:      "Test Nested Html gets formatted properly",
 			expected: []string{
-				"<randomElement table='t1'>one: <randomElement table='t2'>two</randomElement></randomElement>",
+				"<RandomElement table='t1'>one: <RandomElement table='t2'>two</RandomElement></RandomElement>",
 			},
 		},
 	}

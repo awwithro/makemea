@@ -21,7 +21,7 @@ type HtmlFormatter struct {
 }
 
 func (s HtmlFormatter) Format(input string, caller string) string {
-	return fmt.Sprintf("<randomElement table='%s'>%s</randomElement>", caller, input)
+	return fmt.Sprintf("<RandomElement table='%s'>%s</RandomElement>", caller, input)
 }
 
 func (t Tree) WithHtmlFormatter() Tree {

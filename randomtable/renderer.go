@@ -134,7 +134,7 @@ func (r *randomTableRenderer) renderDefinitionDescription(writer util.BufWriter,
 	if entering {
 		text := string(n.Text(source))
 		tableName := r.currentTableNames[0]
-		table, err := r.tree.GetTable(tableName)
+		table, _,err := r.tree.GetTable(tableName)
 		if err != nil {
 				return ast.WalkContinue, fmt.Errorf("unable to find table: %s", tableName)
 			}
@@ -177,7 +177,7 @@ func (r *randomTableRenderer) renderTableRow(writer util.BufWriter, source []byt
 				continue
 			}
 			tableName := r.currentTableNames[x]
-			table, err := r.tree.GetTable(tableName)
+			table, _, err := r.tree.GetTable(tableName)
 
 			if err != nil {
 				return ast.WalkContinue, fmt.Errorf("unable to find table: %s", tableName)
@@ -243,7 +243,7 @@ func (r *randomTableRenderer) renderEmphasis(writer util.BufWriter, source []byt
 		if hideTable{
 			name := string(node.Text(source))
 			name = r.Name(name)
-			t, err := r.tree.GetTable(name)
+			t, _,err := r.tree.GetTable(name)
 			if err != nil {
 				return ast.WalkContinue, err
 			}

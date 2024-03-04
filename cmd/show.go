@@ -12,11 +12,11 @@ import (
 )
 
 func show(tree randomtable.Tree, tableName string) {
-	t, err := tree.GetTable(tableName)
+	t, name, err := tree.GetTable(tableName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := strings.Split(tableName, "/")
+	s := strings.Split(name, "/")
 	shortName := s[len(s)-1]
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
