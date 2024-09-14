@@ -131,9 +131,9 @@ The `fudge` function also supports the optional count argument like `lookup` doe
 | ------------------------------------------------------- |
 | {{fudge "makemea/tables/dicetable/treasure" "1d3+3" 2}} |
 
-### pickup
+### pick
 
-Use the `pickup` function to get a quick random result from a list of values.
+Use the `pick` function to get a quick random result from a list of values.
 
 | Monster                                                      |
 | ------------------------------------------------------------ |
@@ -141,7 +141,7 @@ Use the `pickup` function to get a quick random result from a list of values.
 
 ### chance
 
-Use the `chance` function for a given element to have a certain chance of appearing. This could be done by rolling on different tables, but would get complicated quickly. 
+Use the `chance` function for a given element to have a certain chance of appearing. This could be done by rolling on different tables, but would get complicated quickly.
 You must provide both a chance (0.0 - 1.0) and an option for when the chance fails.
 Also, as the pipe used to chain templates together, you'll need to quote and escape the templates.
 
