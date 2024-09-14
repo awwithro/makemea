@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
-
+var Debug bool
 var rootCmd = &cobra.Command{
 	Use:   "makemea <table_name>",
 	Short: "MakeMeA is a tool to let GMs roll on lookup tables composed in markdown",
@@ -29,6 +29,12 @@ and attempt to turn any tables in those files into tables that can be rolled on.
 
 	},
 	Args: cobra.MinimumNArgs(1),
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if Debug{
+			log.SetLevel(log.DebugLevel)
+			log.Debug("debug logging enabled")
+		}
+	},
 }
 
 func Execute() {
@@ -77,6 +83,7 @@ func MustGetTree() randomtable.Tree {
 }
 
 func init() {
+	rootCmd.PersistentFlags().BoolVarP(&Debug,"debug", "d",false, "set debug logging")
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(serveCmd)
